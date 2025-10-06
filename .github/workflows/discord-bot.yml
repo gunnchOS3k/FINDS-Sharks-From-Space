@@ -1,0 +1,34 @@
+name: Deploy Discord Bot
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'discord-bot/**' ]
+  workflow_dispatch:
+
+jobs:
+  deploy-bot:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.DISCORD_BOT_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      
+      - name: Install dependencies
+        run: |
+          cd discord-bot
+          npm ci
+      
+      - name: Build bot
+        run: |
+          cd discord-bot
+          npm run build
+      
+      - name: Deploy bot (example - replace with your deployment method)
+        run: |
+          echo "Bot built successfully!"
+          echo "Deploy to your server using your preferred method:"
+          echo "- Docker container"
+          echo "- VPS deployment"
+          echo "- Cloud hosting (Railway, Heroku, etc.)"
+        continue-on-error: true
