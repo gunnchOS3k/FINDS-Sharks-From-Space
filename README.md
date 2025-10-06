@@ -1,4 +1,5 @@
 # FINDS — Sharks From Space 🦈🌍
+by Yasmine 3k & Gunncho 3k
 
 **Fin Identification & Navigation from Satellite**  
 **NASA Space Apps NYC | NYU (Edmund Gunn Jr, Yasmine Dweir)**
