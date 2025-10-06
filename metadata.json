@@ -1,0 +1,43 @@
+{
+  "name": "FINDS: Shark Hotspot Forecaster",
+  "description": "An AI-powered web application to generate and visualize likely shark activity hotspots on a global map using Google's Gemini API. Users can specify a region and number of points to generate a real-time heatmap.",
+  "requestFramePermissions": [],
+  "sharks": [
+    {
+      "id": "great-white-1",
+      "file": "great-white-1.jpg",
+      "title": "Great White Shark",
+      "caption": "Apex predator of the oceans, known for its powerful hunting abilities"
+    },
+    {
+      "id": "hammerhead-1", 
+      "file": "hammerhead-1.jpg",
+      "title": "Hammerhead Shark",
+      "caption": "Distinctive hammer-shaped head provides enhanced sensory capabilities"
+    },
+    {
+      "id": "tiger-1",
+      "file": "tiger-1.jpg", 
+      "title": "Tiger Shark",
+      "caption": "Large coastal predator with distinctive dark stripes"
+    },
+    {
+      "id": "whitetip-1",
+      "file": "whitetip-1.jpg",
+      "title": "Whitetip Reef Shark",
+      "caption": "Common reef shark with white-tipped fins"
+    },
+    {
+      "id": "bull-1",
+      "file": "bull-1.jpg",
+      "title": "Bull Shark", 
+      "caption": "Aggressive species that can survive in both salt and fresh water"
+    },
+    {
+      "id": "mako-1",
+      "file": "mako-1.jpg",
+      "title": "Mako Shark",
+      "caption": "Fastest shark species, capable of speeds up to 60 mph"
+    }
+  ]
+}

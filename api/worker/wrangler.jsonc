@@ -1,0 +1,8 @@
+{
+  "name": "finds-worker",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2025-10-01",
+  "r2_buckets": [
+    { "binding": "FIND_BUCKET", "bucket_name": "finds-results-prod" }
+  ]
+}

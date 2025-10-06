@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FINDS: Shark Hotspot Forecaster</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@deck.gl/core": "https://aistudiocdn.com/@deck.gl/core@^9.1.15",
+    "@deck.gl/aggregation-layers": "https://aistudiocdn.com/@deck.gl/aggregation-layers@^9.1.15",
+    "@deck.gl/react": "https://aistudiocdn.com/@deck.gl/react@^9.1.15",
+    "@deck.gl/layers": "https://aistudiocdn.com/@deck.gl/layers@^9.1.15",
+    "@deck.gl/geo-layers": "https://aistudiocdn.com/@deck.gl/geo-layers@^9.1.15",
+    "@deck.gl/mesh-layers": "https://aistudiocdn.com/@deck.gl/mesh-layers@^9.1.15"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gray-900">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+      }
+    </script>
+  </body>
+</html>
