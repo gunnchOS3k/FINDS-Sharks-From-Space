@@ -199,6 +199,28 @@ npm run preview               # Preview production build
 - Check Cloudflare Worker logs
 - App will fallback to demo data automatically
 
+## 📊 **Project Presentation**
+
+### **Slide Deck**
+Our comprehensive presentation showcasing the FINDS project:
+
+- **📋 [Project Slides](https://drive.google.com/file/d/111xzfdWaFjN1wSuBbt7DkpPj1DUrm_k4/view?usp=drive_link)** - Complete project overview and technical details
+- **🎯 Key Features**: Shark hotspot detection, AI-powered analysis, 3D visualization
+- **🔬 Technical Stack**: NASA satellite data, Gemini AI, Cloudflare R2, Deck.gl
+- **🌊 Demo**: Live Edge IO gesture controls for interactive visualization
+
+### **Presentation Highlights**
+- **Problem Statement**: Shark conservation and marine ecosystem monitoring
+- **Solution**: AI-powered satellite data analysis for shark hotspot identification
+- **Technology**: Advanced machine learning with NASA satellite imagery
+- **Impact**: Supporting marine conservation and research efforts
+
+### **Demo Features**
+- **Interactive 3D Visualization**: Real-time shark hotspot mapping
+- **Gesture Controls**: Edge IO integration for hands-free navigation
+- **AI Analysis**: Gemini-powered hotspot prediction and scoring
+- **Data Sources**: NASA satellite imagery and oceanographic data
+
 ## Contributing
 
 1. Fork the repository
