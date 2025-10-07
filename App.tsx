@@ -1,214 +1,177 @@
-import React, { useState, useCallback } from 'react';
-import type { ViewState, PickingInfo } from '@deck.gl/core';
-import { FlyToInterpolator } from '@deck.gl/core';
+import React, { useState, useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View, Platform, Alert } from 'react-native';
+import * as Location from 'expo-location';
+import * as Sensors from 'expo-sensors';
+import { Camera } from 'expo-camera';
 
-import Header from './components/Header';
-import Map from './components/Map';
-import InfoPanel from './components/InfoPanel';
-import LoadingOverlay from './components/LoadingOverlay';
-import HelpModal from './components/HelpModal';
-import Legend from './components/Legend';
-import SharkGallery from './components/SharkGallery';
-import SplashScreen from './components/SplashScreen';
+// Import your existing components (adapted for React Native)
+import MapComponent from './components/Map';
+import ControlsComponent from './components/Controls';
+import HeaderComponent from './components/Header';
+import HotspotInfoComponent from './components/HotspotInfo';
 
-import { generateHotspots } from './services/geminiService';
-import { createEdgeIO } from './services/edgeio';
-import { DEMO_DATA } from './constants';
-import type { Hotspot } from './types';
+export default function App() {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [hasLocationPermission, setHasLocationPermission] = useState(null);
+  const [accelerometerData, setAccelerometerData] = useState({});
 
-const INITIAL_VIEW_STATE: ViewState = {
-  longitude: -74.0,
-  latitude: 40.7,
-  zoom: 7,
-  pitch: 45,
-  bearing: 0,
-};
+  useEffect(() => {
+    (async () => {
+      // Request camera permission
+      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(cameraStatus === 'granted');
 
-const App: React.FC = () => {
-  const [viewState, setViewState] = useState<ViewState>(INITIAL_VIEW_STATE);
-  const [hotspots, setHotspots] = useState<Hotspot[]>(DEMO_DATA.hotspots);
-  const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showHelp, setShowHelp] = useState<boolean>(false);
-  const [showSharkGallery, setShowSharkGallery] = useState<boolean>(false);
-  const [edgeIOActive, setEdgeIOActive] = useState<boolean>(false);
-  const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
-  
-  const [region, setRegion] = useState<string>('New York Bight');
-  const [numPoints, setNumPoints] = useState<number>(200);
-  
-  // Preset regions for cycling
-  const presetRegions = [
-    'New York Bight',
-    'California Coast', 
-    'Florida Keys',
-    'Great Barrier Reef',
-    'Hawaiian Islands',
-    'Mediterranean Sea'
-  ];
+      // Request location permission
+      const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
+      setHasLocationPermission(locationStatus === 'granted');
 
-  const handleGenerate = useCallback(async (genRegion: string, genNumPoints: number) => {
-    setIsLoading(true);
-    setError(null);
-    setSelectedHotspot(null);
-
-    try {
-      const data = await generateHotspots(genRegion, genNumPoints);
-      if (data && data.hotspots.length > 0) {
-        setHotspots(data.hotspots);
-        
-        const firstHotspot = data.hotspots[0];
-        setViewState(current => ({
-          ...current,
-          longitude: firstHotspot.lon,
-          latitude: firstHotspot.lat,
-          zoom: 7,
-          pitch: 45,
-          transitionDuration: 2000,
-          transitionInterpolator: new FlyToInterpolator(),
-        }));
-      } else {
-         setHotspots([]);
-         setError(`No ocean hotspots found for "${genRegion}". The AI may not have found relevant coastal areas. Try a more specific location.`);
+      if (locationStatus !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
       }
-    } catch (e: any) {
-      setError(e.message || "An unknown error occurred.");
-      setHotspots([]); // Clear hotspots on error
-    } finally {
-      setIsLoading(false);
+
+      // Get current location
+      const currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+
+      // Start accelerometer for gesture detection
+      Sensors.Accelerometer.setUpdateInterval(100);
+      const subscription = Sensors.Accelerometer.addListener(accelerometerData => {
+        setAccelerometerData(accelerometerData);
+      });
+
+      return () => subscription?.remove();
+    })();
+  }, []);
+
+  // Handle gesture detection
+  useEffect(() => {
+    const { x, y, z } = accelerometerData;
+    
+    // Simple gesture detection
+    if (Math.abs(x) > 1.5) {
+      // Horizontal shake detected
+      console.log('Horizontal gesture detected');
     }
-  }, []);
-
-  const handleHotspotClick = useCallback((info: PickingInfo) => {
-    if (info.object) {
-      const hotspot = info.object as Hotspot;
-      setSelectedHotspot(hotspot);
-      setViewState(current => ({
-        ...current,
-        longitude: hotspot.lon,
-        latitude: hotspot.lat,
-        zoom: Math.max(current.zoom || 0, 12),
-        pitch: 45,
-        transitionDuration: 1000,
-        transitionInterpolator: new FlyToInterpolator({ speed: 1.5 }),
-      }));
-    } else {
-      setSelectedHotspot(null);
+    
+    if (Math.abs(y) > 1.5) {
+      // Vertical shake detected
+      console.log('Vertical gesture detected');
     }
-  }, []);
-
-  const handleDeepDive = useCallback((hotspot: Hotspot) => {
-    setViewState(current => ({
-      ...current,
-      longitude: hotspot.lon,
-      latitude: hotspot.lat,
-      zoom: 14,
-      pitch: 60,
-      bearing: 0,
-      transitionDuration: 2500,
-      transitionInterpolator: new FlyToInterpolator({ speed: 1.2 }),
-    }));
-  }, []);
-
-  // Edge IO gesture handlers
-  const edgeIO = React.useMemo(() => createEdgeIO(), []);
-  
-  const handleEdgeGesture = useCallback((gesture: string) => {
-    switch (gesture) {
-      case 'right':
-        setNumPoints(prev => Math.min(2000, prev + 50));
-        break;
-      case 'left':
-        setNumPoints(prev => Math.max(10, prev - 50));
-        break;
-      case 'up':
-        const currentIndex = presetRegions.indexOf(region);
-        const nextIndex = (currentIndex + 1) % presetRegions.length;
-        setRegion(presetRegions[nextIndex]);
-        break;
-      case 'down':
-        const currentIndexDown = presetRegions.indexOf(region);
-        const prevIndex = currentIndexDown === 0 ? presetRegions.length - 1 : currentIndexDown - 1;
-        setRegion(presetRegions[prevIndex]);
-        break;
-      case 'shake':
-      case 'tap':
-        setShowSharkGallery(prev => !prev);
-        break;
-      case 'spread':
-        setNumPoints(prev => Math.min(2000, prev + 100));
-        break;
-      case 'pinch':
-        setNumPoints(prev => Math.max(10, prev - 100));
-        break;
+    
+    if (Math.abs(z) > 1.5) {
+      // Z-axis movement detected
+      console.log('Z-axis gesture detected');
     }
-  }, [region, presetRegions]);
+  }, [accelerometerData]);
 
-  // Initialize Edge IO
-  React.useEffect(() => {
-    edgeIO.start({
-      right: () => handleEdgeGesture('right'),
-      left: () => handleEdgeGesture('left'),
-      up: () => handleEdgeGesture('up'),
-      down: () => handleEdgeGesture('down'),
-      shake: () => handleEdgeGesture('shake'),
-      tap: () => handleEdgeGesture('tap'),
-      spread: () => handleEdgeGesture('spread'),
-      pinch: () => handleEdgeGesture('pinch'),
-    });
-    setEdgeIOActive(true);
+  if (hasCameraPermission === null || hasLocationPermission === null) {
+    return <View style={styles.container}><Text>Requesting permissions...</Text></View>;
+  }
 
-    return () => {
-      edgeIO.stop();
-      setEdgeIOActive(false);
-    };
-  }, [edgeIO, handleEdgeGesture]);
-
-  // App loading effect
-  React.useEffect(() => {
-    console.log('🦈 App is loading...');
-    const timer = setTimeout(() => {
-      console.log('🦈 App loading complete!');
-      setIsAppLoading(false);
-    }, 3000); // Show splash screen for 3 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
+  if (hasCameraPermission === false || hasLocationPermission === false) {
+    return (
+      <View style={styles.container}>
+        <Text>Camera or location permission is required for this app.</Text>
+        <Text>Please enable permissions in your device settings.</Text>
+      </View>
+    );
+  }
 
   return (
-    <div className="w-screen h-screen font-sans bg-gray-900 text-white">
-      <SplashScreen isLoading={isAppLoading} />
-      <Header edgeIOActive={edgeIOActive} />
-      <Map 
-        hotspots={hotspots}
-        viewState={viewState}
-        onViewStateChange={({ viewState: newViewState }) => setViewState(newViewState)}
-        onHotspotClick={handleHotspotClick}
+    <View style={styles.container}>
+      <StatusBar style="light" />
+      
+      {/* Header */}
+      <HeaderComponent 
+        title="FINDS - Sharks From Space"
+        subtitle="Mobile Edition"
+        location={location}
       />
-      <InfoPanel
-        region={region}
-        setRegion={setRegion}
-        numPoints={numPoints}
-        setNumPoints={setNumPoints}
-        onGenerate={handleGenerate}
-        isLoading={isLoading}
-        error={error}
-        selectedHotspot={selectedHotspot}
-        onClearSelection={() => setSelectedHotspot(null)}
-        onShowHelp={() => setShowHelp(true)}
-        onDeepDive={handleDeepDive}
-        onShowSharkGallery={() => setShowSharkGallery(true)}
+      
+      {/* Map Component */}
+      <View style={styles.mapContainer}>
+        <MapComponent 
+          location={location}
+          style={styles.map}
+        />
+      </View>
+      
+      {/* Controls */}
+      <ControlsComponent 
+        onRegionChange={(region) => console.log('Region changed:', region)}
+        onPointsChange={(points) => console.log('Points changed:', points)}
+        style={styles.controls}
       />
-      <Legend />
-      {isLoading && <LoadingOverlay numPoints={numPoints} />}
-      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
-      <SharkGallery 
-        isVisible={showSharkGallery} 
-        onClose={() => setShowSharkGallery(false)} 
+      
+      {/* Hotspot Info */}
+      <HotspotInfoComponent 
+        style={styles.hotspotInfo}
       />
-    </div>
+      
+      {/* Gesture Indicator */}
+      <View style={styles.gestureIndicator}>
+        <Text style={styles.gestureText}>
+          Gesture Controls Active
+        </Text>
+        <Text style={styles.gestureSubtext}>
+          Shake device to interact
+        </Text>
+      </View>
+    </View>
   );
-};
+}
 
-export default App;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0b0b0b',
+  },
+  mapContainer: {
+    flex: 1,
+    margin: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  map: {
+    flex: 1,
+  },
+  controls: {
+    position: 'absolute',
+    bottom: 100,
+    left: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 10,
+    padding: 15,
+  },
+  hotspotInfo: {
+    position: 'absolute',
+    top: 100,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 10,
+    padding: 15,
+    maxWidth: 200,
+  },
+  gestureIndicator: {
+    position: 'absolute',
+    top: 50,
+    left: 10,
+    backgroundColor: 'rgba(0, 255, 0, 0.2)',
+    borderRadius: 5,
+    padding: 10,
+  },
+  gestureText: {
+    color: '#00ff00',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  gestureSubtext: {
+    color: '#00ff00',
+    fontSize: 10,
+  },
+});
