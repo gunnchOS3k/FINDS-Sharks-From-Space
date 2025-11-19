@@ -6,7 +6,7 @@ This directory contains all presentation materials for the FINDS (Fin Identifica
 
 ### **Main Project Slides**
 - **📋 [Google Drive Slides](https://drive.google.com/file/d/111xzfdWaFjN1wSuBbt7DkpPj1DUrm_k4/view?usp=drive_link)** - Complete project overview
-- **📅 Last Updated**: October 2024
+- **📅 Last Updated**: October 2025
 - **👥 Authors**: Yasmine 3k & Gunncho 3k
 - **🏛️ Event**: NASA Space Apps NYC | NYU
 
