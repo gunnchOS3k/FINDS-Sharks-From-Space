@@ -59,7 +59,7 @@
     "wait-on": "^7.2.0",
     "@expo/cli": "^0.16.0",
     "eas-cli": "^7.0.0",
-    "vite-plugin-pwa": "^0.17.0"
+    "vite-plugin-pwa": "^0.21.0"
   },
   "build": {
     "appId": "com.gunnchos.finds",

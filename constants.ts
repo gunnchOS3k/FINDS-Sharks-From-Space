@@ -91,3 +91,9 @@ export const LOADING_MESSAGES = [
   'Generating predictive hotspot coordinates...',
   'Finalizing geospatial data...'
 ];
+
+// Map tile URL - using OpenStreetMap as default
+export const MAP_TILE_URL = 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+// Shark 3D model URL - placeholder for now
+export const SHARK_MODEL_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-station.glb';
