@@ -1,0 +1,25 @@
+@startuml finds-sequence
+actor User
+participant UI
+participant Worker
+participant R2
+participant NASA
+participant Gemini
+
+User -> UI: Generate hotspots
+UI -> Worker: POST /api/hotspots
+Worker -> Worker: validate region, n, bbox
+Worker -> R2: GET cache key
+alt HIT
+  R2 --> Worker: cached JSON
+else MISS
+  Worker -> NASA: GIBS WMS SST + chlorophyll
+  NASA --> Worker: PNG visualizations
+  Worker -> Worker: decode colormap, grid cells
+  Worker -> Gemini: score/explain cells only
+  Gemini --> Worker: scores + rationales
+  Worker -> R2: PUT result
+end
+Worker --> UI: hotspots + provenance
+UI -> User: map render or fallback
+@enduml

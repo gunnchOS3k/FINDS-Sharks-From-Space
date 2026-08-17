@@ -1,0 +1,22 @@
+@startuml finds-deployment
+node "Browser / PWA / Pixel 6a WebView" {
+  artifact "FINDS UI"
+}
+cloud Cloudflare {
+  artifact "Pages"
+  artifact "Worker"
+  storage "R2"
+}
+cloud NASA {
+  artifact "GIBS WMS"
+  artifact "GIBS colormaps"
+}
+cloud Google {
+  artifact "Gemini API"
+}
+"FINDS UI" --> Pages
+"FINDS UI" --> Worker
+Worker --> R2
+Worker --> "GIBS WMS"
+Worker --> "Gemini API"
+@enduml

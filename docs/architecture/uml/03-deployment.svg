@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="03-deployment">
+  <rect width="900" height="520" rx="18" fill="#04121c"/>
+  <text x="24" y="36" fill="#3ee0d2" font-size="22" font-family="sans-serif">03-deployment</text>
+  <text x="24" y="64" fill="#e7f6ff" font-size="14">node "Browser / PWA / Pixel 6a WebView" {</text>
+<text x="24" y="86" fill="#e7f6ff" font-size="14">artifact "FINDS UI"</text>
+<text x="24" y="108" fill="#e7f6ff" font-size="14">}</text>
+<text x="24" y="130" fill="#e7f6ff" font-size="14">cloud Cloudflare {</text>
+<text x="24" y="152" fill="#e7f6ff" font-size="14">artifact "Pages"</text>
+<text x="24" y="174" fill="#e7f6ff" font-size="14">artifact "Worker"</text>
+<text x="24" y="196" fill="#e7f6ff" font-size="14">storage "R2"</text>
+<text x="24" y="218" fill="#e7f6ff" font-size="14">}</text>
+<text x="24" y="240" fill="#e7f6ff" font-size="14">cloud NASA {</text>
+<text x="24" y="262" fill="#e7f6ff" font-size="14">artifact "GIBS WMS"</text>
+<text x="24" y="284" fill="#e7f6ff" font-size="14">artifact "GIBS colormaps"</text>
+<text x="24" y="306" fill="#e7f6ff" font-size="14">}</text>
+<text x="24" y="328" fill="#e7f6ff" font-size="14">cloud Google {</text>
+<text x="24" y="350" fill="#e7f6ff" font-size="14">artifact "Gemini API"</text>
+<text x="24" y="372" fill="#e7f6ff" font-size="14">}</text>
+<text x="24" y="394" fill="#e7f6ff" font-size="14">"FINDS UI" --&gt; Pages</text>
+<text x="24" y="416" fill="#e7f6ff" font-size="14">"FINDS UI" --&gt; Worker</text>
+<text x="24" y="438" fill="#e7f6ff" font-size="14">Worker --&gt; R2</text>
+</svg>

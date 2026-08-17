@@ -1,234 +1,87 @@
-# FINDS — Sharks From Space 🦈🌍
-by Yasmine 3k & Gunncho 3k
+# FINDS — Sharks From Space
 
-**Fin Identification & Navigation from Satellite**  
-**NASA Space Apps NYC | NYU (Edmund Gunn Jr, Yasmine Dweir)**
+FINDS helps people explore where environmental ocean conditions may correspond with shark-activity hotspots using NASA observations, AI-assisted analysis, and an interactive map.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-![Status](https://img.shields.io/badge/status-production--ready-green)
-![Built with](https://img.shields.io/badge/AI-Gemini%20%7C%20R2%20%7C%20Deck.gl%20%7C%20Edge%20IO-6f42c1)
+🏆 **NYC Best Use of Gemini API — NASA Space Apps Challenge 2025**  
+NASA Space Apps NYC | NYU collaborators **Edmund Gunn Jr.** and **Yasmine Dweir**
 
-FINDS identifies likely shark-activity hotspots using AI-assisted prediction with Google Gemini, caches results in **Cloudflare R2** (zero-egress), and renders interactive 3D visualizations with **Deck.gl**. **Edge IO** gesture controls enable interactive exploration of visualization modes.
+> FINDS is an exploratory research and visualization project. Hotspot scores are not real-time shark warnings and should not be used as a substitute for official marine-safety guidance.
 
----
+[Try locally (demo, no secrets)](docs/GETTING_STARTED.md) · [How FINDS works](docs/ARCHITECTURE.md) · [Install Android](docs/GETTING_STARTED.md#android) · [Pixel 6a evidence](docs/release/PIXEL_6A_VALIDATION.md) · [Explore the code](#engineer)
 
-## Architecture
+The intended Cloudflare Pages URL is `https://finds-web.pages.dev`. It returned **404** on 2026-08-17 from this workstation because local Wrangler is not logged in. Production deploy is an owner gate (GitHub Actions `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` plus Worker secrets). Do not treat that URL as a live demo until `/health` succeeds.
 
-> GitHub's Mermaid requires HTML `<br/>` for line breaks and quoted labels. (Docs: "Creating diagrams".)
+![CI](https://github.com/gunnchOS3k/FINDS-Sharks-From-Space/actions/workflows/ci.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-```mermaid
-flowchart LR
-  U["User Input<br/>(Region, Point Count)"] --> W["Cloudflare Worker<br/>API endpoint"]
-  W --> AI["Google Gemini AI<br/>hotspot generation & scoring"]
-  AI --> R2[(Cloudflare R2<br/>cache results)]
-  R2 --> W
-  W --> F["Frontend<br/>React + TypeScript"]
-  F --> D["Deck.gl overlay<br/>heatmap + 3D markers"]
-  E["Edge IO gestures"] -.control.-> F
-```
+## Explain it like I'm new
 
-## Features
+- **What is a shark hotspot here?** A scored ocean cell where NASA sea-surface temperature and chlorophyll-a look more like conditions researchers associate with marine productivity and thermal habitat. It is not a confirmed shark and not a beach flag.
+- **What does NASA provide?** Public GIBS visualizations of JPL MUR Level-4 SST and PACE/VIIRS chlorophyll-a. FINDS samples those rasters on a geographic grid and records provenance.
+- **What does Gemini do?** It ranks and explains the NASA-derived cells. In live mode it does not invent coordinates.
+- **What does the map show?** A heatmap and markers for scored cells. Gold markers are the highest exploratory scores, also labeled in text.
+- **Is this a real safety warning?** No.
 
-- 🦈 **Shark Species Gallery**: Interactive gallery with shark images and information
-- 🎮 **Edge IO Gesture Controls**: Keyboard, mobile motion, and touch gestures
-- 🌊 **AI-Powered Hotspot Generation**: Uses Google Gemini API for realistic predictions
-- 📱 **PWA Support**: Installable on mobile devices with offline capabilities
-- 🗺️ **Interactive 3D Map**: Powered by Deck.gl for smooth visualization
-- ⚡ **Cloudflare Worker Backend**: Fast, edge-optimized API with R2 caching
+## Recruiter snapshot
 
-## Quick Start
+FINDS began as a NASA Space Apps 2025 hackathon prototype that won **NYC Best Use of Gemini API**. The original demo asked Gemini for plausible points. This public-release branch adds a NASA observation pipeline, a hardened Cloudflare Worker, R2 read-through cache, tests, UML, PWA packaging, and a Capacitor Android app for Pixel 6a.
 
-### Local Development (with Worker)
+**Team:** Edmund Gunn Jr. and Yasmine Dweir. Public commit history on this repository is the verifiable contribution record; this README does not invent a task split.
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+**Skills demonstrated:** React, TypeScript, Vite, Deck.gl, NASA GIBS, Gemini structured output, Cloudflare Workers/R2, PWA, Capacitor Android, Vitest/Playwright, accessibility, scientific provenance.
 
-2. **Set up Cloudflare Worker (optional):**
-   ```bash
-   # Create .dev.vars in api/worker/
-   echo "GEMINI_API_KEY=your_api_key_here" > api/worker/.dev.vars
-   
-   # Start local worker
-   npm run worker:dev
-   ```
+**Supported platforms (verified in this release effort):** Web, installable PWA, Capacitor Android APK. Obsolete Expo/React Native and Electron stubs were removed from the canonical path; Git history still contains the hackathon-era files.
 
-3. **Start web app:**
-   ```bash
-   # Mac/Linux
-   VITE_API_BASE="http://127.0.0.1:8787" npm run dev
-   
-   # Windows
-   set VITE_API_BASE=http://127.0.0.1:8787 && npm run dev
-   ```
+Architecture in 60 seconds: the UI posts a region to the Worker; the Worker checks R2; on miss it pulls NASA GIBS SST + chlorophyll, converts pixels through official colormaps, scores cells, optionally asks Gemini to explain those cells, caches the JSON, and returns provenance to Deck.gl.
 
-### Local Development (without Worker)
+## Engineer
 
 ```bash
-npm install
+git clone https://github.com/gunnchOS3k/FINDS-Sharks-From-Space.git
+cd FINDS-Sharks-From-Space
+npm ci
 npm run dev
 ```
 
-The app will automatically fall back to demo data if no API is available.
-
-## Edge IO Gesture Controls
-
-### Desktop (Keyboard)
-- **Arrow Keys**: Navigate regions and adjust hotspot count
-  - `←` / `→`: Decrease/increase hotspot count by 50
-  - `↑` / `↓`: Cycle through preset regions
-- **+/-**: Fine-tune hotspot count by 100
-- **Space**: Toggle shark gallery
-
-### Mobile (Motion + Touch)
-- **Shake**: Toggle shark gallery
-- **Tap**: Floating tap button for gesture input
-- **Pinch/Spread**: Adjust hotspot density
-
-### Preset Regions
-- New York Bight
-- California Coast
-- Florida Keys
-- Great Barrier Reef
-- Hawaiian Islands
-- Mediterranean Sea
-
-## Deployment
-
-### Cloudflare Worker + Pages
-
-1. **Deploy Worker:**
-   ```bash
-   cd api/worker
-   wrangler deploy
-   ```
-
-2. **Build and Deploy Web App:**
-   ```bash
-   VITE_API_BASE="https://your-worker.workers.dev" npm run build
-   wrangler pages deploy dist --project-name=finds-web
-   ```
-
-### GitHub Actions (Automatic)
-
-The repository includes a CI/CD pipeline that automatically:
-- Deploys the Cloudflare Worker
-- Builds the web app with the correct API endpoint
-- Deploys to Cloudflare Pages
-
-## Offline Fallback
-
-The app gracefully handles offline scenarios:
-1. **Primary**: Cloudflare Worker API
-2. **Fallback**: Local demo data (`/public/demo.json`)
-3. **Final**: Mock data generation
-
-## PWA Installation
-
-### Mobile (iOS/Android)
-1. Open the app in your mobile browser
-2. Look for "Add to Home Screen" option
-3. Install as a native app
-
-### Desktop
-- Chrome/Edge: Look for install button in address bar
-- Firefox: Add to Home Screen option in menu
-
-## Development Scripts
+Demo/offline mode works without secrets. Live NASA + Gemini scoring:
 
 ```bash
-# Development
-npm run dev                    # Start dev server
-npm run start:mac             # Mac-optimized dev server
-npm run start:win             # Windows dev server (port 3000)
-
-# Worker development
-npm run worker:dev             # Local Cloudflare Worker
-
-# Production
-npm run build                  # Build for production
-npm run preview               # Preview production build
+cp .env.example .env
+# set VITE_API_BASE to the Worker URL
+cd api/worker && cp ../../.env.example ../../api/worker/.dev.vars
+# put GEMINI_API_KEY in api/worker/.dev.vars — never commit it
+npm run worker:dev
+VITE_API_BASE=http://127.0.0.1:8787 npm run dev
 ```
 
-## Project Structure
+Primary local gate: `npm run verify`
 
+| Path | Role |
+|---|---|
+| `src/` | Canonical Vite + React UI |
+| `shared/` | NASA ingest, scoring, validation |
+| `api/worker/` | Cloudflare Worker |
+| `docs/architecture/uml/` | PlantUML + SVG |
+| `android/` | Capacitor wrapper (generated) |
+
+See [Getting started](docs/GETTING_STARTED.md), [Architecture](docs/ARCHITECTURE.md), [NASA pipeline](docs/data/NASA_DATA_PIPELINE.md), [Provenance](docs/data/DATA_PROVENANCE.md), [Limitations](docs/data/SCIENTIFIC_LIMITATIONS.md), [Pixel 6a validation](docs/release/PIXEL_6A_VALIDATION.md), [Claims vs evidence](docs/release/CLAIMS_EVIDENCE_MATRIX.md).
+
+### Pixel 6a (debug APK)
+
+![Map and NASA-derived cells](docs/media/pixel6a/02-home-map.png)
+
+![Selected cell with SST and chlorophyll](docs/media/pixel6a/05-selected-hotspot.png)
+
+Simplified flow:
+
+```mermaid
+flowchart LR
+  U[Visitor] --> UI[Vite React PWA / Android WebView]
+  UI --> W[Cloudflare Worker]
+  W --> R2[(R2 cache)]
+  W --> NASA[NASA GIBS SST + chlorophyll]
+  W --> G[Gemini scoring of NASA cells]
+  UI --> MAP[Deck.gl map]
 ```
-├── components/           # React components
-│   ├── SharkGallery.tsx # Shark species gallery
-│   ├── Controls.tsx     # Main control panel
-│   └── ...
-├── services/
-│   ├── geminiService.ts # AI API integration
-│   └── edgeio.ts        # Gesture control system
-├── api/worker/          # Cloudflare Worker
-│   ├── src/worker.mjs  # Worker implementation
-│   └── wrangler.jsonc  # Worker configuration
-├── public/
-│   ├── sharks/         # Shark images
-│   ├── demo.json       # Fallback data
-│   ├── manifest.json   # PWA manifest
-│   └── sw.js           # Service worker
-└── .github/workflows/  # CI/CD pipelines
-```
 
-## Environment Variables
-
-### Development
-- `GEMINI_API_KEY`: Google Gemini API key (for direct API calls)
-- `VITE_API_BASE`: Cloudflare Worker URL (for production)
-
-### Production
-- `CLOUDFLARE_API_TOKEN`: For CI/CD deployment
-- `CLOUDFLARE_ACCOUNT_ID`: For CI/CD deployment
-
-## Troubleshooting
-
-### Images Not Loading
-- Ensure shark images are in `/public/sharks/`
-- Check `metadata.json` has correct file references
-- Verify image file extensions match metadata
-
-### Gestures Not Working
-- Check browser permissions for motion sensors
-- Ensure Edge IO service is active (green indicator)
-- Try keyboard fallback on desktop
-
-### API Errors
-- Verify `VITE_API_BASE` is set correctly
-- Check Cloudflare Worker logs
-- App will fallback to demo data automatically
-
-## 📊 **Project Presentation**
-
-### **Slide Deck**
-Our comprehensive presentation showcasing the FINDS project:
-
-- **📋 [Project Slides](https://drive.google.com/file/d/111xzfdWaFjN1wSuBbt7DkpPj1DUrm_k4/view?usp=drive_link)** - Complete project overview and technical details
-- **🎯 Key Features**: Shark hotspot detection, AI-powered analysis, 3D visualization
-- **🔬 Technical Stack**: NASA satellite data, Gemini AI, Cloudflare R2, Deck.gl
-- **🌊 Demo**: Live Edge IO gesture controls for interactive visualization
-
-### **Presentation Highlights**
-- **Problem Statement**: Shark conservation and marine ecosystem monitoring
-- **Solution**: AI-powered satellite data analysis for shark hotspot identification
-- **Technology**: Advanced machine learning with NASA satellite imagery
-- **Impact**: Supporting marine conservation and research efforts
-
-### **Demo Features**
-- **Interactive 3D Visualization**: Real-time shark hotspot mapping
-- **Gesture Controls**: Edge IO integration for hands-free navigation
-- **AI Analysis**: Gemini-powered hotspot prediction and scoring
-- **Data Sources**: NASA satellite imagery and oceanographic data
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly (especially gestures and PWA)
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details.
+[Component diagram](docs/architecture/uml/02-component.svg) · [Generate sequence](docs/architecture/uml/04-sequence.svg) · [ADR-001](docs/architecture/ADR-001-canonical-client.md)

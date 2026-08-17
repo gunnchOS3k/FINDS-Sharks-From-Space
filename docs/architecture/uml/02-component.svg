@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="02-component">
+  <rect width="900" height="520" rx="18" fill="#04121c"/>
+  <text x="24" y="36" fill="#3ee0d2" font-size="22" font-family="sans-serif">02-component</text>
+  <text x="24" y="64" fill="#e7f6ff" font-size="14">[Vite React UI] --&gt; [FINDS Worker API]</text>
+<text x="24" y="86" fill="#e7f6ff" font-size="14">[FINDS Worker API] --&gt; [NASA GIBS WMS]</text>
+<text x="24" y="108" fill="#e7f6ff" font-size="14">[FINDS Worker API] --&gt; [Gemini generateContent]</text>
+<text x="24" y="130" fill="#e7f6ff" font-size="14">[FINDS Worker API] --&gt; [Cloudflare R2]</text>
+<text x="24" y="152" fill="#e7f6ff" font-size="14">[PWA Service Worker] --&gt; [Vite React UI]</text>
+<text x="24" y="174" fill="#e7f6ff" font-size="14">[Capacitor Android] --&gt; [Vite React UI]</text>
+</svg>
