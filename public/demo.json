@@ -1,20 +1,36 @@
 {
+  "schemaVersion": "1.0.0",
+  "requestId": "demo-nybight",
   "region": "New York Bight",
   "params": {
-    "n": 200,
-    "bbox": null,
-    "seed": 42
+    "n": 12,
+    "bbox": [-74.5, 39.5, -71.5, 41.2],
+    "requestedN": 12
   },
   "hotspots": [
-    {"lat": 40.7128, "lon": -74.0060, "score": 0.95},
-    {"lat": 40.7589, "lon": -73.9851, "score": 0.87},
-    {"lat": 40.6892, "lon": -74.0445, "score": 0.92},
-    {"lat": 40.7505, "lon": -73.9934, "score": 0.78},
-    {"lat": 40.6782, "lon": -73.9442, "score": 0.85},
-    {"lat": 40.7282, "lon": -74.0776, "score": 0.91},
-    {"lat": 40.7614, "lon": -73.9776, "score": 0.83},
-    {"lat": 40.6892, "lon": -74.0445, "score": 0.89},
-    {"lat": 40.7505, "lon": -73.9934, "score": 0.76},
-    {"lat": 40.6782, "lon": -73.9442, "score": 0.88}
-  ]
+    {"id": "obs-11", "lat": 40.12, "lon": -73.21, "score": 0.82, "label": "high", "rationale": "Demo cell on the New York Bight shelf with moderate SST and elevated chlorophyll proxy.", "sstC": 21.4, "chlorophyllMgM3": 1.8, "qualityNotes": ["Demo fixture derived from a deterministic NY Bight ocean grid. Not a live GIBS fetch."]},
+    {"id": "obs-18", "lat": 40.28, "lon": -72.84, "score": 0.76, "label": "high", "rationale": "Outer-shelf demo cell.", "sstC": 20.9, "chlorophyllMgM3": 1.1, "qualityNotes": []},
+    {"id": "obs-22", "lat": 39.86, "lon": -73.55, "score": 0.61, "label": "elevated", "rationale": "Nearshore shelf demo cell.", "sstC": 22.1, "chlorophyllMgM3": 0.7, "qualityNotes": []},
+    {"id": "obs-31", "lat": 40.51, "lon": -72.41, "score": 0.48, "label": "moderate", "rationale": "Cooler offshore demo cell.", "sstC": 18.2, "chlorophyllMgM3": 0.3, "qualityNotes": []},
+    {"id": "obs-40", "lat": 39.72, "lon": -72.95, "score": 0.33, "label": "low", "rationale": "Lower combined suitability in this demo grid.", "sstC": 16.4, "chlorophyllMgM3": 0.12, "qualityNotes": []}
+  ],
+  "provenance": {
+    "mode": "demo",
+    "sourceAgency": "NASA",
+    "sourceProduct": ["GHRSST_L4_MUR_Sea_Surface_Temperature", "OCI_PACE_Chlorophyll_a"],
+    "sourceDataset": ["MUR-JPL-L4-GLOB-v4.1", "PACE_OCI_L2_BGC"],
+    "observationStart": "2026-08-14T00:00:00Z",
+    "observationEnd": "2026-08-14T23:59:59Z",
+    "retrievedAt": "2026-08-17T00:00:00Z",
+    "variables": [
+      {"name": "sea_surface_temperature", "units": "degC"},
+      {"name": "chlorophyll_a", "units": "mg m-3"}
+    ],
+    "qualityNotes": ["Offline/demo fixture. Coordinates are a deterministic ocean grid inside the New York Bight bbox, not Gemini-invented points and not live telemetry."],
+    "model": null,
+    "pipelineVersion": "2026.08.1",
+    "generatedAt": "2026-08-17T00:00:00Z",
+    "cache": {"key": "demo|new-york-bight", "status": "BYPASS", "ttlSeconds": 0}
+  },
+  "disclaimer": "FINDS is an exploratory research and visualization project. Hotspot scores are not real-time shark warnings and should not be used as a substitute for official marine-safety guidance."
 }
