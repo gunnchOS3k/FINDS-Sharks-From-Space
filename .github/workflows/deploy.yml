@@ -23,6 +23,13 @@ jobs:
             echo "ERROR: CLOUDFLARE_ACCOUNT_ID is not configured in repository secrets."
             exit 1
           fi
+          EXPECTED="74cebc4a53594725cc5f50ddc7ad0d25"
+          if [ "${CF_ACCOUNT}" = "${EXPECTED}" ]; then
+            echo "R2_ACCOUNT_MATCH_PASS"
+          else
+            echo "R2_ACCOUNT_MATCH_FAIL"
+            exit 1
+          fi
           echo "Cloudflare secret names verified (values not printed)."
 
   deploy:
@@ -42,6 +49,45 @@ jobs:
       - run: npm ci
       - run: npm run verify
 
+      - name: R2 S3 credential diagnostic (GitHub Actions only)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "ERROR: R2 S3 credential secret names missing."
+            exit 1
+          fi
+          npm install --no-save @aws-sdk/client-s3@3 >/dev/null 2>&1
+          node <<'NODE'
+          const { S3Client, ListBucketsCommand } = require('@aws-sdk/client-s3');
+          const client = new S3Client({
+            region: 'auto',
+            endpoint: 'https://74cebc4a53594725cc5f50ddc7ad0d25.r2.cloudflarestorage.com',
+            credentials: {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            },
+          });
+          (async () => {
+            try {
+              const result = await client.send(new ListBucketsCommand({}));
+              const names = (result.Buckets || []).map((b) => b.Name).filter(Boolean);
+              console.log('R2_S3_AUTH_PASS');
+              console.log('Bucket count:', names.length);
+              if (names.includes('finds-results-prod')) console.log('finds-results-prod: present');
+            } catch (error) {
+              const code = error?.name || error?.Code || 'Unknown';
+              const msg = String(error?.message || error).replace(/[A-Za-z0-9+/=]{20,}/g, '[REDACTED]');
+              console.error('R2_S3_AUTH_FAIL');
+              console.error('Error class:', code);
+              console.error('Message:', msg.slice(0, 300));
+              process.exit(1);
+            }
+          })();
+          NODE
+
       - name: Ensure production R2 bucket exists
         run: |
           set -euo pipefail
@@ -60,17 +106,17 @@ jobs:
           fi
           npx wrangler r2 bucket list --config api/worker/wrangler.toml | grep -q finds-results-prod
 
-      - name: Verify Worker secrets before deploy
+      - name: Configure Worker GEMINI_API_KEY from GitHub secret
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           set -euo pipefail
-          SECRETS="$(npx wrangler secret list --config api/worker/wrangler.toml 2>/dev/null || true)"
-          if ! echo "$SECRETS" | grep -q GEMINI_API_KEY; then
-            echo "ERROR: GEMINI_API_KEY is not configured on finds-worker."
-            echo "Configure it with: npx wrangler secret put GEMINI_API_KEY --config api/worker/wrangler.toml"
-            echo "Or add it in Cloudflare Dashboard → Workers & Pages → finds-worker → Settings → Secrets."
+          if [ -z "${GEMINI_API_KEY}" ]; then
+            echo "ERROR: GEMINI_API_KEY is not configured in repository secrets."
             exit 1
           fi
-          echo "GEMINI_API_KEY secret name present on Worker (value not printed)."
+          printf '%s' "$GEMINI_API_KEY" | npx wrangler secret put GEMINI_API_KEY --config api/worker/wrangler.toml
+          echo "GEMINI_API_KEY secret name configured on Worker (value not printed)."
 
       - name: Deploy Cloudflare Worker
         id: worker_deploy
