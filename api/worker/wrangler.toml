@@ -1,0 +1,18 @@
+name = "finds-worker"
+main = "src/index.ts"
+compatibility_date = "2026-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+PIPELINE_VERSION = "2026.08.1"
+GEMINI_MODEL = "gemini-2.5-flash"
+ALLOWED_ORIGINS = "https://finds-web.pages.dev,http://localhost:3000,http://127.0.0.1:3000,http://localhost:4173,capacitor://localhost"
+
+[[r2_buckets]]
+binding = "FIND_BUCKET"
+bucket_name = "finds-results-prod"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.xml"]
+fallthrough = true
