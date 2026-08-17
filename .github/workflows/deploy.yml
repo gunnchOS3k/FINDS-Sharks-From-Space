@@ -216,13 +216,13 @@ jobs:
           set -euo pipefail
           CACHE_BUST="closeout-$(date +%s)"
           BODY="{\"region\":\"new-york-bight\",\"n\":37,\"bbox\":[-74.48,39.52,-71.52,41.18]}"
-          MISS="$(curl -fsS -D /tmp/h1.headers -o /tmp/h1.json -X POST "$WORKER_URL/api/hotspots" \
+          curl -fsS -D /tmp/h1.headers -o /tmp/h1.json -X POST "$WORKER_URL/api/hotspots" \
             -H "content-type: application/json" -H "x-request-id: $CACHE_BUST-miss" \
-            --data "$BODY")"
+            --data "$BODY"
           XCACHE1="$(grep -i '^x-cache:' /tmp/h1.headers | awk '{print $2}' | tr -d '\r' || true)"
           echo "First request x-cache: ${XCACHE1:-unknown}"
-          echo "$MISS" | node -e "
-            const p=JSON.parse(require('fs').readFileSync(0,'utf8'));
+          node -e "
+            const p=JSON.parse(require('fs').readFileSync('/tmp/h1.json','utf8'));
             if(p.schemaVersion!=='1.0.0') throw new Error('bad schema');
             if(p.provenance?.sourceAgency!=='NASA') throw new Error('missing NASA provenance');
             if(!p.provenance?.model || !String(p.provenance.model).includes('gemini-3.6-flash')) {
@@ -235,9 +235,9 @@ jobs:
             }
             console.log('Hotspot smoke OK:', p.hotspots.length, 'cells, model', p.provenance.model);
           "
-          HIT="$(curl -fsS -D /tmp/h2.headers -o /tmp/h2.json -X POST "$WORKER_URL/api/hotspots" \
+          curl -fsS -D /tmp/h2.headers -o /tmp/h2.json -X POST "$WORKER_URL/api/hotspots" \
             -H "content-type: application/json" -H "x-request-id: $CACHE_BUST-hit" \
-            --data "$BODY")"
+            --data "$BODY"
           XCACHE2="$(grep -i '^x-cache:' /tmp/h2.headers | awk '{print $2}' | tr -d '\r' || true)"
           echo "Second request x-cache: ${XCACHE2:-unknown}"
           if [ "$XCACHE1" != "MISS" ] && [ "$XCACHE2" != "HIT" ]; then
