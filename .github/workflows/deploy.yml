@@ -60,17 +60,17 @@ jobs:
           fi
           npx wrangler r2 bucket list --config api/worker/wrangler.toml | grep -q finds-results-prod
 
-      - name: Verify Worker secrets before deploy
+      - name: Configure Worker GEMINI_API_KEY from GitHub secret
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           set -euo pipefail
-          SECRETS="$(npx wrangler secret list --config api/worker/wrangler.toml 2>/dev/null || true)"
-          if ! echo "$SECRETS" | grep -q GEMINI_API_KEY; then
-            echo "ERROR: GEMINI_API_KEY is not configured on finds-worker."
-            echo "Configure it with: npx wrangler secret put GEMINI_API_KEY --config api/worker/wrangler.toml"
-            echo "Or add it in Cloudflare Dashboard → Workers & Pages → finds-worker → Settings → Secrets."
+          if [ -z "${GEMINI_API_KEY}" ]; then
+            echo "ERROR: GEMINI_API_KEY is not configured in repository secrets."
             exit 1
           fi
-          echo "GEMINI_API_KEY secret name present on Worker (value not printed)."
+          printf '%s' "$GEMINI_API_KEY" | npx wrangler secret put GEMINI_API_KEY --config api/worker/wrangler.toml
+          echo "GEMINI_API_KEY secret name configured on Worker (value not printed)."
 
       - name: Deploy Cloudflare Worker
         id: worker_deploy

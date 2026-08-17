@@ -1,0 +1,111 @@
+name: R2 Diagnostic
+
+# Safe R2 credential + account diagnostic. Never prints secret values.
+on:
+  workflow_dispatch:
+
+jobs:
+  account-match:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Compare CLOUDFLARE_ACCOUNT_ID to R2 endpoint account
+        run: |
+          set -euo pipefail
+          EXPECTED="74cebc4a53594725cc5f50ddc7ad0d25"
+          if [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+            echo "ERROR: CLOUDFLARE_ACCOUNT_ID secret is not configured."
+            exit 1
+          fi
+          if [ "${CLOUDFLARE_ACCOUNT_ID}" = "${EXPECTED}" ]; then
+            echo "R2_ACCOUNT_MATCH_PASS"
+          else
+            echo "R2_ACCOUNT_MATCH_FAIL"
+            exit 1
+          fi
+
+  r2-s3-auth:
+    runs-on: ubuntu-latest
+    needs: account-match
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify R2 S3 endpoint authentication
+        run: |
+          set -euo pipefail
+          ENDPOINT="https://74cebc4a53594725cc5f50ddc7ad0d25.r2.cloudflarestorage.com"
+          if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "ERROR: R2 S3 credential secret names missing."
+            exit 1
+          fi
+          npm install --no-save @aws-sdk/client-s3@3 >/dev/null 2>&1
+          node <<'NODE'
+          const { S3Client, ListBucketsCommand } = require('@aws-sdk/client-s3');
+          const endpoint = 'https://74cebc4a53594725cc5f50ddc7ad0d25.r2.cloudflarestorage.com';
+          const client = new S3Client({
+            region: 'auto',
+            endpoint,
+            credentials: {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            },
+          });
+          (async () => {
+            try {
+              const result = await client.send(new ListBucketsCommand({}));
+              const names = (result.Buckets || []).map((b) => b.Name).filter(Boolean);
+              console.log('R2_S3_AUTH_PASS');
+              console.log('Bucket count:', names.length);
+              if (names.includes('finds-results-prod')) {
+                console.log('finds-results-prod: present');
+              } else {
+                console.log('finds-results-prod: not listed (may need R2 enablement or create)');
+              }
+            } catch (error) {
+              const code = error?.name || error?.Code || 'Unknown';
+              const msg = String(error?.message || error).replace(/[A-Za-z0-9+/=]{20,}/g, '[REDACTED]');
+              console.error('R2_S3_AUTH_FAIL');
+              console.error('Error class:', code);
+              console.error('Message:', msg.slice(0, 300));
+              process.exit(1);
+            }
+          })();
+          NODE
+
+  r2-entitlement:
+    runs-on: ubuntu-latest
+    needs: account-match
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check R2 entitlement via Wrangler
+        run: |
+          set -euo pipefail
+          LOG=/tmp/r2-entitlement.log
+          npx wrangler r2 bucket list --config api/worker/wrangler.toml 2>&1 | tee "$LOG" || true
+          if grep -qi '10042\|Please enable R2\|NotEntitled' "$LOG"; then
+            echo "R2_ENTITLEMENT_FAIL"
+            echo "HUMAN ACTION REQUIRED: Enable R2 in Cloudflare Dashboard for this exact account: 74cebc4a53594725cc5f50ddc7ad0d25"
+            exit 1
+          fi
+          if grep -qi finds-results-prod "$LOG"; then
+            echo "R2_ENTITLEMENT_PASS (finds-results-prod listed)"
+          else
+            echo "R2_ENTITLEMENT_PASS (R2 enabled; finds-results-prod may need create on deploy)"
+          fi
