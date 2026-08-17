@@ -2,22 +2,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="07-class">
   <rect width="900" height="520" rx="18" fill="#04121c"/>
   <text x="24" y="36" fill="#3ee0d2" font-size="22" font-family="sans-serif">07-class</text>
-  <text x="24" y="64" fill="#e7f6ff" font-size="14">class Region {</text>
-<text x="24" y="86" fill="#e7f6ff" font-size="14">id</text>
-<text x="24" y="108" fill="#e7f6ff" font-size="14">name</text>
-<text x="24" y="130" fill="#e7f6ff" font-size="14">bbox</text>
-<text x="24" y="152" fill="#e7f6ff" font-size="14">}</text>
-<text x="24" y="174" fill="#e7f6ff" font-size="14">class ObservationCell {</text>
-<text x="24" y="196" fill="#e7f6ff" font-size="14">lat</text>
-<text x="24" y="218" fill="#e7f6ff" font-size="14">lon</text>
-<text x="24" y="240" fill="#e7f6ff" font-size="14">sstC</text>
-<text x="24" y="262" fill="#e7f6ff" font-size="14">chlorophyllMgM3</text>
-<text x="24" y="284" fill="#e7f6ff" font-size="14">}</text>
-<text x="24" y="306" fill="#e7f6ff" font-size="14">class Hotspot {</text>
-<text x="24" y="328" fill="#e7f6ff" font-size="14">lat</text>
-<text x="24" y="350" fill="#e7f6ff" font-size="14">lon</text>
-<text x="24" y="372" fill="#e7f6ff" font-size="14">score</text>
-<text x="24" y="394" fill="#e7f6ff" font-size="14">rationale</text>
-<text x="24" y="416" fill="#e7f6ff" font-size="14">}</text>
-<text x="24" y="438" fill="#e7f6ff" font-size="14">class Provenance {</text>
+  <text x="24" y="64" fill="#e7f6ff" font-size="14">package "Live production" {</text>
+<text x="24" y="86" fill="#e7f6ff" font-size="14">class Region {</text>
+<text x="24" y="108" fill="#e7f6ff" font-size="14">id</text>
+<text x="24" y="130" fill="#e7f6ff" font-size="14">name</text>
+<text x="24" y="152" fill="#e7f6ff" font-size="14">bbox</text>
+<text x="24" y="174" fill="#e7f6ff" font-size="14">}</text>
+<text x="24" y="196" fill="#e7f6ff" font-size="14">class ObservationCell {</text>
+<text x="24" y="218" fill="#e7f6ff" font-size="14">lat</text>
+<text x="24" y="240" fill="#e7f6ff" font-size="14">lon</text>
+<text x="24" y="262" fill="#e7f6ff" font-size="14">sstC</text>
+<text x="24" y="284" fill="#e7f6ff" font-size="14">chlorophyllMgM3</text>
+<text x="24" y="306" fill="#e7f6ff" font-size="14">}</text>
+<text x="24" y="328" fill="#e7f6ff" font-size="14">class Hotspot {</text>
+<text x="24" y="350" fill="#e7f6ff" font-size="14">lat</text>
+<text x="24" y="372" fill="#e7f6ff" font-size="14">lon</text>
+<text x="24" y="394" fill="#e7f6ff" font-size="14">score</text>
+<text x="24" y="416" fill="#e7f6ff" font-size="14">rationale</text>
+<text x="24" y="438" fill="#e7f6ff" font-size="14">}</text>
 </svg>

@@ -8,6 +8,7 @@ package shared {
   [nasa]
   [scoring]
   [validation]
+  [tagConcept] <<conceptual>>
 }
 package api.worker {
   [index]
@@ -15,4 +16,8 @@ package api.worker {
 [App] --> [nasa]
 [index] --> [nasa]
 [index] --> [scoring]
+note right of [tagConcept]
+  Conceptual types only;
+  not imported by Worker pipeline
+end note
 @enduml

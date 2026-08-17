@@ -9,7 +9,7 @@ authors:
   - family-names: Dweir
     given-names: Yasmine
 repository-code: "https://github.com/gunnchOS3k/FINDS-Sharks-From-Space"
-abstract: "Exploratory visualization of NASA sea-surface temperature and chlorophyll-a with Gemini-assisted scoring of observation cells."
+abstract: "Exploratory NASA SST/chlorophyll habitat-hotspot visualization with Gemini-assisted ranking of observation cells. Not shark detection or marine-safety guidance."
 license: MIT
 version: 2.0.0
 date-released: "2026-08-17"

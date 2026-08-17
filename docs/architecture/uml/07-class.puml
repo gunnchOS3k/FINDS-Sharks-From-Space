@@ -1,27 +1,38 @@
 @startuml finds-domain
-class Region {
-  id
-  name
-  bbox
+package "Live production" {
+  class Region {
+    id
+    name
+    bbox
+  }
+  class ObservationCell {
+    lat
+    lon
+    sstC
+    chlorophyllMgM3
+  }
+  class Hotspot {
+    lat
+    lon
+    score
+    rationale
+  }
+  class Provenance {
+    mode
+    sourceProduct
+    cache
+  }
+  Region "1" --> "*" ObservationCell
+  ObservationCell "1" --> "0..1" Hotspot
+  Hotspot "*" --> "1" Provenance
 }
-class ObservationCell {
-  lat
-  lon
-  sstC
-  chlorophyllMgM3
+package "Conceptual tag <<conceptual>>" {
+  class TagTelemetryBatch {
+    provenance
+    synthetic
+  }
 }
-class Hotspot {
-  lat
-  lon
-  score
-  rationale
-}
-class Provenance {
-  mode
-  sourceProduct
-  cache
-}
-Region "1" --> "*" ObservationCell
-ObservationCell "1" --> "0..1" Hotspot
-Hotspot "*" --> "1" Provenance
+note bottom of TagTelemetryBatch
+  Not connected to Hotspot scoring in v2.x
+end note
 @enduml

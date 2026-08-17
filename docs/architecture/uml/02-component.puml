@@ -1,8 +1,17 @@
 @startuml finds-component
-[Vite React UI] --> [FINDS Worker API]
-[FINDS Worker API] --> [NASA GIBS WMS]
-[FINDS Worker API] --> [Gemini generateContent]
-[FINDS Worker API] --> [Cloudflare R2]
-[PWA Service Worker] --> [Vite React UI]
-[Capacitor Android] --> [Vite React UI]
+package "LIVE PRODUCTION" {
+  [Vite React UI] --> [FINDS Worker API]
+  [FINDS Worker API] --> [NASA GIBS WMS]
+  [FINDS Worker API] --> [Gemini generateContent]
+  [FINDS Worker API] --> [Cloudflare R2]
+  [PWA Service Worker] --> [Vite React UI]
+  [Capacitor Android] --> [Vite React UI]
+}
+package "FUTURE / CONCEPTUAL <<conceptual>>" {
+  [Tag ingest API] ..> [TagTelemetryBatch]
+  note right of [Tag ingest API]
+    Not deployed in v2.x.
+    See docs/challenge/CONCEPTUAL_SHARK_TAG_MODEL.md
+  end note
+}
 @enduml
