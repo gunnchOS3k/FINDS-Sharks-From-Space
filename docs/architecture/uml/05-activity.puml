@@ -1,0 +1,25 @@
+@startuml finds-activity
+start
+:Select region;
+:POST /api/hotspots;
+if (Valid input?) then (no)
+  :400 error;
+  stop
+endif
+if (R2 HIT?) then (yes)
+  :Return cached result;
+  stop
+endif
+:Fetch NASA GIBS SST and chlorophyll;
+:Sample bbox grid and quality-filter;
+if (Usable cells?) then (no)
+  :422 no observations;
+  stop
+endif
+:Deterministic score;
+if (Gemini key present?) then (yes)
+  :Gemini ranks existing cells;
+endif
+:Persist R2 and return;
+stop
+@enduml

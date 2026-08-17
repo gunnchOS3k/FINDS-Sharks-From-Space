@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" role="img" aria-label="Shortfin mako">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop stop-color="#04121c"/><stop offset="1" stop-color="#0b3a4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#g)"/>
+  <path d="M40 140c40-40 90-54 160-30l50-28-8 36c30 16 48 30 70 34-60-4-92 8-130 24-50 20-100 10-142-36z" fill="#5ec8d8"/>
+  <circle cx="230" cy="108" r="6" fill="#04121c"/>
+  <text x="24" y="36" fill="#e7f6ff" font-size="22" font-family="Avenir Next, Segoe UI, sans-serif">Shortfin mako</text>
+  <text x="24" y="220" fill="#9db8c9" font-size="14" font-family="Avenir Next, Segoe UI, sans-serif">Original FINDS illustration</text>
+</svg>

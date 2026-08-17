@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="04-sequence">
+  <rect width="900" height="520" rx="18" fill="#04121c"/>
+  <text x="24" y="36" fill="#3ee0d2" font-size="22" font-family="sans-serif">04-sequence</text>
+  <text x="24" y="64" fill="#e7f6ff" font-size="14">actor User</text>
+<text x="24" y="86" fill="#e7f6ff" font-size="14">participant UI</text>
+<text x="24" y="108" fill="#e7f6ff" font-size="14">participant Worker</text>
+<text x="24" y="130" fill="#e7f6ff" font-size="14">participant R2</text>
+<text x="24" y="152" fill="#e7f6ff" font-size="14">participant NASA</text>
+<text x="24" y="174" fill="#e7f6ff" font-size="14">participant Gemini</text>
+<text x="24" y="196" fill="#e7f6ff" font-size="14">User -&gt; UI: Generate hotspots</text>
+<text x="24" y="218" fill="#e7f6ff" font-size="14">UI -&gt; Worker: POST /api/hotspots</text>
+<text x="24" y="240" fill="#e7f6ff" font-size="14">Worker -&gt; Worker: validate region, n, bbox</text>
+<text x="24" y="262" fill="#e7f6ff" font-size="14">Worker -&gt; R2: GET cache key</text>
+<text x="24" y="284" fill="#e7f6ff" font-size="14">alt HIT</text>
+<text x="24" y="306" fill="#e7f6ff" font-size="14">R2 --&gt; Worker: cached JSON</text>
+<text x="24" y="328" fill="#e7f6ff" font-size="14">else MISS</text>
+<text x="24" y="350" fill="#e7f6ff" font-size="14">Worker -&gt; NASA: GIBS WMS SST + chlorophyll</text>
+<text x="24" y="372" fill="#e7f6ff" font-size="14">NASA --&gt; Worker: PNG visualizations</text>
+<text x="24" y="394" fill="#e7f6ff" font-size="14">Worker -&gt; Worker: decode colormap, grid cells</text>
+<text x="24" y="416" fill="#e7f6ff" font-size="14">Worker -&gt; Gemini: score/explain cells only</text>
+<text x="24" y="438" fill="#e7f6ff" font-size="14">Gemini --&gt; Worker: scores + rationales</text>
+</svg>

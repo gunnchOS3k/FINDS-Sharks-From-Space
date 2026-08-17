@@ -1,0 +1,8 @@
+@startuml finds-component
+[Vite React UI] --> [FINDS Worker API]
+[FINDS Worker API] --> [NASA GIBS WMS]
+[FINDS Worker API] --> [Gemini generateContent]
+[FINDS Worker API] --> [Cloudflare R2]
+[PWA Service Worker] --> [Vite React UI]
+[Capacitor Android] --> [Vite React UI]
+@enduml

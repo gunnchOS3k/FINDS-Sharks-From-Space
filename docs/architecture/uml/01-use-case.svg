@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="01-use-case">
+  <rect width="900" height="520" rx="18" fill="#04121c"/>
+  <text x="24" y="36" fill="#3ee0d2" font-size="22" font-family="sans-serif">01-use-case</text>
+  <text x="24" y="64" fill="#e7f6ff" font-size="14">actor Visitor</text>
+<text x="24" y="86" fill="#e7f6ff" font-size="14">actor Recruiter</text>
+<text x="24" y="108" fill="#e7f6ff" font-size="14">actor Engineer</text>
+<text x="24" y="130" fill="#e7f6ff" font-size="14">rectangle FINDS {</text>
+<text x="24" y="152" fill="#e7f6ff" font-size="14">Visitor --&gt; (Explore ocean map)</text>
+<text x="24" y="174" fill="#e7f6ff" font-size="14">Visitor --&gt; (Generate hotspots)</text>
+<text x="24" y="196" fill="#e7f6ff" font-size="14">Visitor --&gt; (Read provenance)</text>
+<text x="24" y="218" fill="#e7f6ff" font-size="14">Visitor --&gt; (Open shark gallery)</text>
+<text x="24" y="240" fill="#e7f6ff" font-size="14">Recruiter --&gt; (Review architecture and award)</text>
+<text x="24" y="262" fill="#e7f6ff" font-size="14">Engineer --&gt; (Run verify and deploy)</text>
+<text x="24" y="284" fill="#e7f6ff" font-size="14">(Generate hotspots) --&gt; (NASA GIBS ingest)</text>
+<text x="24" y="306" fill="#e7f6ff" font-size="14">(Generate hotspots) --&gt; (Gemini scoring)</text>
+<text x="24" y="328" fill="#e7f6ff" font-size="14">}</text>
+</svg>

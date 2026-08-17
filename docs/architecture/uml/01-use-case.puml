@@ -1,0 +1,16 @@
+@startuml finds-use-case
+left to right direction
+actor Visitor
+actor Recruiter
+actor Engineer
+rectangle FINDS {
+  Visitor --> (Explore ocean map)
+  Visitor --> (Generate hotspots)
+  Visitor --> (Read provenance)
+  Visitor --> (Open shark gallery)
+  Recruiter --> (Review architecture and award)
+  Engineer --> (Run verify and deploy)
+  (Generate hotspots) --> (NASA GIBS ingest)
+  (Generate hotspots) --> (Gemini scoring)
+}
+@enduml

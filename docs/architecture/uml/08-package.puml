@@ -1,0 +1,18 @@
+@startuml finds-package
+package src {
+  [App]
+  [MapView]
+  [edgeio]
+}
+package shared {
+  [nasa]
+  [scoring]
+  [validation]
+}
+package api.worker {
+  [index]
+}
+[App] --> [nasa]
+[index] --> [nasa]
+[index] --> [scoring]
+@enduml

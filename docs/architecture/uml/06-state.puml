@@ -1,0 +1,13 @@
+@startuml finds-state
+[*] --> Onboarding
+Onboarding --> Idle
+Idle --> Loading : generate
+Loading --> Live : NASA + optional Gemini
+Loading --> Demo : API failure
+Loading --> Offline : navigator offline
+Live --> Cached : same key
+Demo --> Loading : retry
+Offline --> Loading : reconnect
+Live --> Selected : tap hotspot
+Selected --> Idle : clear
+@enduml

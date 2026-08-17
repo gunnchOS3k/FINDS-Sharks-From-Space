@@ -1,0 +1,11 @@
+{
+  "name": "FINDS — Sharks From Space",
+  "sharks": [
+    {"id": "great-white", "file": "great-white.svg", "title": "Great white shark", "caption": "Original FINDS illustration"},
+    {"id": "hammerhead", "file": "hammerhead.svg", "title": "Scalloped hammerhead", "caption": "Original FINDS illustration"},
+    {"id": "tiger", "file": "tiger.svg", "title": "Tiger shark", "caption": "Original FINDS illustration"},
+    {"id": "whitetip", "file": "whitetip.svg", "title": "Whitetip reef shark", "caption": "Original FINDS illustration"},
+    {"id": "bull", "file": "bull.svg", "title": "Bull shark", "caption": "Original FINDS illustration"},
+    {"id": "mako", "file": "mako.svg", "title": "Shortfin mako", "caption": "Original FINDS illustration"}
+  ]
+}

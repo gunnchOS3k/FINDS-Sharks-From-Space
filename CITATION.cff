@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+title: "FINDS — Sharks From Space"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Gunn
+    given-names: Edmund
+    suffix: Jr.
+  - family-names: Dweir
+    given-names: Yasmine
+repository-code: "https://github.com/gunnchOS3k/FINDS-Sharks-From-Space"
+abstract: "Exploratory visualization of NASA sea-surface temperature and chlorophyll-a with Gemini-assisted scoring of observation cells."
+license: MIT
+version: 2.0.0
+date-released: "2026-08-17"

@@ -1,0 +1,27 @@
+@startuml finds-domain
+class Region {
+  id
+  name
+  bbox
+}
+class ObservationCell {
+  lat
+  lon
+  sstC
+  chlorophyllMgM3
+}
+class Hotspot {
+  lat
+  lon
+  score
+  rationale
+}
+class Provenance {
+  mode
+  sourceProduct
+  cache
+}
+Region "1" --> "*" ObservationCell
+ObservationCell "1" --> "0..1" Hotspot
+Hotspot "*" --> "1" Provenance
+@enduml
