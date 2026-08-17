@@ -2,7 +2,7 @@
 
 Status values: **PASS** (implemented and evidenced in production), **PARTIAL** (implemented but not fully exercised in production), **FAIL**, **BLOCKED** (external gate).
 
-Last updated: production closeout on `main`, HEAD `51492b0` (post-R2 enablement).
+Last updated: production closeout on `main`, HEAD `2e25bb3` (deploy run 32079503395 green).
 
 | Claim | Implementation | Test | Evidence | Status |
 |---|---|---|---|---|
@@ -22,7 +22,7 @@ Last updated: production closeout on `main`, HEAD `51492b0` (post-R2 enablement)
 | NYC Best Use of Gemini API | README / Help | historical | README | PASS (stated award) |
 | UML (8 diagrams) | PlantUML + SVG | `npm run diagrams:check` | `docs/architecture/uml/` | PASS |
 | CI green | lint, typecheck, unit, integration, build, e2e, android | GitHub Actions `ci.yml` | Actions tab | PASS |
-| Deploy pipeline | hardened `deploy.yml` + R2 diagnostics | deploy run 32079349660 | Actions deploy run | PARTIAL (Worker + Pages deploy PASS; Pages shell validation TLS retry pending final green run) |
+| Deploy pipeline | hardened `deploy.yml` + R2 diagnostics | deploy run 32079503395 | Actions deploy run | PASS |
 | Security (no secrets in bundle) | audit scripts + grep | manual + CI | `.gitignore`, `scripts/test-production.mjs` | PASS |
 | Real-time shark warning | Not claimed | N/A | Disclaimer everywhere | PASS (honestly not claimed) |
 
@@ -59,5 +59,5 @@ Last updated: production closeout on `main`, HEAD `51492b0` (post-R2 enablement)
 | RECRUITER_REVIEW_PASS | PASS | Edmund Gunn Jr. + Yasmine Dweir credit preserved |
 | CLAIMS_EVIDENCE_PASS | PASS | this matrix updated honestly |
 | ACTIONS_CLEANUP_PASS | PASS | Retained ci, deploy, codeql, r2-diagnostic; discord-bot trimmed |
-| V2_DRAFT_RELEASE_PASS | BLOCKED | Awaiting full deploy green + physical Pixel gestures |
-| RELEASE_READY_PASS | BLOCKED | Physical pinch/spread/shake + final deploy workflow green |
+| V2_DRAFT_RELEASE_PASS | BLOCKED | Awaiting physical Pixel pinch/spread/shake |
+| RELEASE_READY_PASS | BLOCKED | Physical pinch/spread/shake not observed |

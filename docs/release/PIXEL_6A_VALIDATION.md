@@ -10,7 +10,7 @@ Device serial numbers are intentionally omitted.
 | Display name | FINDS — Sharks From Space |
 | App version | `2.0.0` (versionCode 2) |
 | Accepted branch | `main` |
-| Accepted SHA | `51492b0` (production closeout after R2 enablement) |
+| Accepted SHA | `2e25bb3` (production closeout after R2 enablement) |
 | Production Worker URL | `https://finds-worker.gunnchos-finds.workers.dev` |
 | Production Pages URL | `https://finds-web-4j5.pages.dev` |
 | Validation time | 2026-08-17 (America/Chicago) |
