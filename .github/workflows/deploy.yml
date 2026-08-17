@@ -299,9 +299,16 @@ jobs:
           set -euo pipefail
           PAGES_LOG=/tmp/pages-deploy.log
           npx wrangler pages deploy dist --project-name=finds-web --commit-dirty=true 2>&1 | tee "$PAGES_LOG"
-          PAGES_URL="$(grep -Eo 'https://[a-zA-Z0-9.-]+\.pages\.dev' "$PAGES_LOG" | head -1 || true)"
+          PAGES_URL="$(npx wrangler pages project list --json 2>/dev/null | node -e "
+            let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+              const rows=JSON.parse(d||'[]');
+              const project=rows.find(p=>p.name==='finds-web');
+              const sub=project?.subdomain || project?.domains?.[0] || 'finds-web-4j5';
+              console.log('https://'+sub+'.pages.dev');
+            });
+          " || true)"
           if [ -z "$PAGES_URL" ]; then
-            PAGES_URL="https://finds-web.pages.dev"
+            PAGES_URL="https://finds-web-4j5.pages.dev"
           fi
           echo "Discovered Pages URL: $PAGES_URL"
           echo "pages_url=$PAGES_URL" >> "$GITHUB_OUTPUT"
@@ -312,7 +319,18 @@ jobs:
           WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
         run: |
           set -euo pipefail
-          curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/" | grep -q 200
+          for attempt in $(seq 1 36); do
+            if curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/" 2>/dev/null | grep -q 200; then
+              echo "Pages reachable on attempt ${attempt}"
+              break
+            fi
+            if [ "$attempt" -eq 36 ]; then
+              echo "ERROR: Pages not reachable at $PAGES_URL after 6 minutes"
+              exit 1
+            fi
+            echo "Waiting for Pages TLS/DNS (attempt ${attempt}/36)..."
+            sleep 10
+          done
           curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/manifest.webmanifest" | grep -q 200
           curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/pwa-192x192.png" | grep -q 200
           INDEX="$(curl -fsS "$PAGES_URL/")"

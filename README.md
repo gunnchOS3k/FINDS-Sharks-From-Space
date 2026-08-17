@@ -7,8 +7,8 @@ NASA Space Apps NYC | collaborators **Edmund Gunn Jr.** and **Yasmine Dweir**
 
 > FINDS is an exploratory research and visualization project. Hotspot scores are not real-time shark warnings and should not be used as a substitute for official marine-safety guidance.
 
-**Try FINDS:** production URL is set after Cloudflare Pages deploy (`FINDS_PAGES_URL` repository variable).  
-**API:** production Worker URL (`FINDS_WORKER_URL` repository variable) serves `/health`, `/version`, and `POST /api/hotspots`.
+**Try FINDS:** [https://finds-web-4j5.pages.dev](https://finds-web-4j5.pages.dev)  
+**API:** [https://finds-worker.gunnchos-finds.workers.dev](https://finds-worker.gunnchos-finds.workers.dev) serves `/health`, `/version`, and `POST /api/hotspots`.
 
 [How FINDS works](docs/ARCHITECTURE.md) · [Install Android](docs/GETTING_STARTED.md#android) · [NASA provenance](docs/data/NASA_DATA_PIPELINE.md) · [Scientific limitations](docs/data/SCIENTIFIC_LIMITATIONS.md) · [Pixel 6a evidence](docs/release/PIXEL_6A_VALIDATION.md) · [Claims vs evidence](docs/release/CLAIMS_EVIDENCE_MATRIX.md)
 
@@ -72,7 +72,7 @@ See [Getting started](docs/GETTING_STARTED.md), [Architecture](docs/ARCHITECTURE
 Build against the live Worker (not localhost):
 
 ```bash
-FINDS_WORKER_URL=https://<your-worker>.workers.dev npm run android:build
+FINDS_WORKER_URL=https://finds-worker.gunnchos-finds.workers.dev npm run android:build
 npm run android:install
 ```
 

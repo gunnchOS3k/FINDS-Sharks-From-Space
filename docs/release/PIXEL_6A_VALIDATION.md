@@ -9,45 +9,40 @@ Device serial numbers are intentionally omitted.
 | Package | `com.gunnchos.finds` |
 | Display name | FINDS — Sharks From Space |
 | App version | `2.0.0` (versionCode 2) |
-| Closeout branch | `cursor/finds-production-closeout-v2` |
-| Accepted main SHA | `8f1e4de3a385aff662b3448e22eec1caf0ec559e` |
-| Production Worker URL | **Pending deploy** (`FINDS_WORKER_URL` not set) |
+| Accepted branch | `main` |
+| Accepted SHA | `51492b0` (production closeout after R2 enablement) |
+| Production Worker URL | `https://finds-worker.gunnchos-finds.workers.dev` |
+| Production Pages URL | `https://finds-web-4j5.pages.dev` |
 | Validation time | 2026-08-17 (America/Chicago) |
 
-## Status (production closeout)
-
-Prior validation on `cursor/finds-public-release-pixel6a` exercised live NASA via a **local Wrangler Worker** on the workstation LAN. That path is **not** sufficient for production closeout.
-
-Production Pixel acceptance requires:
-
-1. Cloudflare R2 enabled and Worker deployed
-2. `GEMINI_API_KEY` configured on `finds-worker`
-3. `FINDS_WORKER_URL=… npm run android:build` (rejects localhost)
-4. Fresh install on Pixel with no `adb reverse` and no local FINDS servers
-5. Physical pinch, spread, and shake verification
-
-## Prior exercised cases (local Worker — not production PASS)
+## Production closeout status
 
 | Case | Result | Notes |
 |---|---|---|
-| Install / launch | PASS | debug APK |
-| Onboarding / Help | PASS | |
-| Generate NY Bight | PASS | local Worker, NASA provenance |
-| Map / hotspot select | PASS | screenshots in `docs/media/pixel6a/` |
-| Offline demo | PASS | |
-| Background / force-stop | PASS | |
-| logcat FATAL | PASS | no crash observed |
-| Pinch / spread | PARTIAL | not conclusively verified physically |
-| Shake | NOT RUN | |
-| Production Worker on device | BLOCKED | deploy pending |
-
-## Screenshots
-
-See [docs/media/pixel6a/](../media/pixel6a/) — captured during local-Worker session; production re-capture pending after deploy.
+| Install / launch | PASS | Production APK built with `FINDS_WORKER_URL`; streamed install via adb |
+| adb reverse cleared | PASS | No reverse tunnels before launch |
+| Local servers stopped | PASS | Wrangler dev on 8787 stopped before install |
+| logcat FATAL | PASS | No `FATAL EXCEPTION` for `com.gunnchos.finds` after launch |
+| Production Worker on device | PASS | APK bundle embeds production Worker host (not localhost) |
+| Generate NY Bight (production) | PASS | Worker `/api/hotspots` returns NASA provenance + `gemini-3.6-flash` |
+| R2 cache (production) | PASS | Verified MISS→HIT on live Worker |
+| Offline demo | PARTIAL | Prior session PASS; production re-run pending explicit offline toggle |
+| Background / force-stop / reopen | PARTIAL | Launch/resume observed; full cycle not re-screenshot |
+| Pinch / spread | BLOCKED | Physical gesture not observed in this closeout run |
+| Shake | BLOCKED | Physical shake not observed in this closeout run |
 
 ## Physical tests still required
 
-- **Pinch / spread:** `PIXEL PHYSICAL TEST: Please pinch inward and then spread outward on the FINDS map now.`
-- **Shake:** `PIXEL PHYSICAL TEST: Please physically shake the connected Pixel 6a now.`
+Record `PINCH_PASS`, `SPREAD_PASS`, and `SHAKE_PASS` only after observed device behavior against the **production** APK.
 
-Record `PINCH_PASS`, `SPREAD_PASS`, `SHAKE_PASS` only after observed device behavior against the **production** APK.
+## Screenshots
+
+Prior local-Worker captures remain in [docs/media/pixel6a/](../media/pixel6a/). Production re-capture recommended after physical gesture verification.
+
+## Evidence commands (no serial logged)
+
+```bash
+FINDS_WORKER_URL=https://finds-worker.gunnchos-finds.workers.dev npm run android:build
+npm run android:install
+node scripts/pixel-acceptance.mjs
+```

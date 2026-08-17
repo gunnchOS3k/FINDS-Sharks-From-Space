@@ -2,28 +2,28 @@
 
 Status values: **PASS** (implemented and evidenced in production), **PARTIAL** (implemented but not fully exercised in production), **FAIL**, **BLOCKED** (external gate).
 
-Last updated: production closeout branch `cursor/finds-production-closeout-v2`, HEAD `768fa76`.
+Last updated: production closeout on `main`, HEAD `51492b0` (post-R2 enablement).
 
 | Claim | Implementation | Test | Evidence | Status |
 |---|---|---|---|---|
-| Uses NASA SST | GIBS WMS MUR L4 SST + official colormap | Worker fixture + live probe | `shared/nasa.ts` | PASS (adapter). Production Worker **BLOCKED** (deploy pending R2 enablement) |
-| Uses NASA chlorophyll-a | GIBS PACE/VIIRS fallback | Same | `shared/nasa.ts` | PASS (adapter). Production **BLOCKED** |
-| Gemini 3.6 Flash scores NASA cells only | `DEFAULT_GEMINI_MODEL=gemini-3.6-flash`; `mergeGeminiScores` drops unknown ids | `tests/unit/pipeline.test.ts` | `shared/gemini.ts`, [Google model docs](https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash) | PASS (code + model migration). Live Gemini **BLOCKED** (Worker not deployed) |
+| Uses NASA SST | GIBS WMS MUR L4 SST + official colormap | Worker fixture + live probe | `shared/nasa.ts` | PASS (adapter + production Worker) |
+| Uses NASA chlorophyll-a | GIBS PACE/VIIRS fallback | Same | `shared/nasa.ts` | PASS (production) |
+| Gemini 3.6 Flash scores NASA cells only | `DEFAULT_GEMINI_MODEL=gemini-3.6-flash`; `mergeGeminiScores` drops unknown ids | `tests/unit/pipeline.test.ts` | `shared/gemini.ts`, live `/version` | PASS |
 | Gemini server-side only | Client → Worker; no `VITE_` Gemini key | grep `src/` | `src/services/api.ts` | PASS |
-| Cloudflare Worker API | `/health`, `/version`, `POST /api/hotspots` | `tests/worker/worker.test.ts` | `api/worker/src/index.ts` | PASS locally. Live Worker **BLOCKED** |
-| R2 read-through cache | MISS persist, HIT return | worker integration test | `api/worker/src/index.ts` | PASS (mock). Production R2 **BLOCKED** (Cloudflare API 10042 — R2 not enabled) |
-| Deck.gl map | Heatmap + scatter | Playwright + Pixel screenshots | `src/components/MapView.tsx` | PASS |
-| PWA installable | vite-plugin-pwa | `tests/e2e/pwa.spec.ts` | `vite.config.ts` | PASS (automated). Live Pages **BLOCKED** |
-| Offline / demo mode | `/demo.json` fallback | Playwright + Pixel | `public/demo.json` | PASS |
-| Android APK | Capacitor 7, `com.gunnchos.finds` v2.0.0 | `assembleDebug` + adb | `android/` | PARTIAL — debug APK from prior session; production build requires `FINDS_WORKER_URL` |
-| Pixel 6a verified | Physical device tests | adb | `docs/release/PIXEL_6A_VALIDATION.md` | PARTIAL — prior session used local Worker; production path **BLOCKED** |
-| Pinch / spread | Deck.gl + panel pointer pair | unit + physical | `src/services/edgeio.ts` | PARTIAL — physical pinch/spread not conclusively PASS on production |
-| Shake | DeviceMotionEvent → gallery | unit + physical | `src/services/edgeio.ts` | BLOCKED — physical shake not yet verified on production |
+| Cloudflare Worker API | `/health`, `/version`, `POST /api/hotspots` | `tests/worker/worker.test.ts` + production smoke | `api/worker/src/index.ts` | PASS (live) |
+| R2 read-through cache | MISS persist, HIT return | worker integration + live curl | `api/worker/src/index.ts` | PASS (production MISS/HIT) |
+| Deck.gl map | Heatmap + scatter | Playwright + Pixel | `src/components/MapView.tsx` | PASS |
+| PWA installable | vite-plugin-pwa | `tests/e2e/pwa.spec.ts` + live manifest | `vite.config.ts` | PASS |
+| Offline / demo mode | `/demo.json` fallback | Playwright + Pixel | `public/demo.json` | PARTIAL (automated PASS; production Pixel offline not re-run) |
+| Android APK | Capacitor 7, `com.gunnchos.finds` v2.0.0 | `assembleDebug` + adb | `android/` | PASS (production Worker build) |
+| Pixel 6a verified | Physical device tests | adb + `scripts/pixel-acceptance.mjs` | `docs/release/PIXEL_6A_VALIDATION.md` | PARTIAL (install/launch/production API PASS; pinch/spread/shake BLOCKED) |
+| Pinch / spread | Deck.gl + panel pointer pair | unit + physical | `src/services/edgeio.ts` | BLOCKED (physical not observed) |
+| Shake | DeviceMotionEvent → gallery | unit + physical | `src/services/edgeio.ts` | BLOCKED (physical not observed) |
 | NYC Best Use of Gemini API | README / Help | historical | README | PASS (stated award) |
 | UML (8 diagrams) | PlantUML + SVG | `npm run diagrams:check` | `docs/architecture/uml/` | PASS |
-| CI green | lint, typecheck, unit, integration, build, e2e, android | GitHub Actions `ci.yml` | Actions tab | PASS on branch push |
-| Deploy pipeline | hardened `deploy.yml` + R2 diagnostics | workflow_dispatch run 32076275026 | Actions deploy run | BLOCKED — R2 not enabled (10042); S3 diagnostic SSL fail (R2 unprovisioned) |
-| Security (no secrets in bundle) | audit scripts + grep | manual + CI | `.gitignore`, `scripts/test-production.mjs` | PASS (`dist/` scan clean) |
+| CI green | lint, typecheck, unit, integration, build, e2e, android | GitHub Actions `ci.yml` | Actions tab | PASS |
+| Deploy pipeline | hardened `deploy.yml` + R2 diagnostics | deploy run 32079349660 | Actions deploy run | PARTIAL (Worker + Pages deploy PASS; Pages shell validation TLS retry pending final green run) |
+| Security (no secrets in bundle) | audit scripts + grep | manual + CI | `.gitignore`, `scripts/test-production.mjs` | PASS |
 | Real-time shark warning | Not claimed | N/A | Disclaimer everywhere | PASS (honestly not claimed) |
 
 ## Production closeout gates (2026-08-17)
@@ -31,29 +31,33 @@ Last updated: production closeout branch `cursor/finds-production-closeout-v2`, 
 | Gate | Status | Notes |
 |---|---|---|
 | OWNER_SECRET_CONFIGURATION_PASS | PASS | All 5 secret names present via `gh secret list` |
-| R2_ACCOUNT_MATCH_PASS | PASS | Deploy preflight run 32076275026 |
-| R2_S3_AUTH_PASS | FAIL | Deploy run 32076275026 — SSL handshake (R2 endpoint unprovisioned) |
-| R2_BINDING_PASS | BLOCKED | `wrangler.toml` binding correct; bucket create blocked by 10042 |
-| LIVE_WORKER_PASS | BLOCKED | Worker not deployed |
-| LIVE_PAGES_PASS | BLOCKED | Pages not deployed |
-| GEMINI_PRODUCTION_PASS | BLOCKED | Worker not deployed |
-| GEMINI_3_6_MIGRATION_PASS | PASS | code + wrangler.toml + tests default `gemini-3.6-flash` |
-| GEMINI_DATA_INTEGRITY_PASS | PASS | `mergeGeminiScores` drops unknown ids; pipeline tests green |
-| NASA_PRODUCTION_PASS | BLOCKED | needs live Worker |
-| R2_MISS_HIT_PASS | BLOCKED | R2 not enabled (Cloudflare 10042) |
-| PRODUCTION_SMOKE_PASS | BLOCKED | no `FINDS_WORKER_URL` |
+| R2_ENTITLEMENT_PASS | PASS | R2 diagnostic run 32078437322 |
+| R2_ACCOUNT_MATCH_PASS | PASS | Deploy preflight + R2 diagnostic |
+| R2_S3_AUTH_PASS | PASS | R2 diagnostic + deploy run 32079349660 |
+| R2_BUCKET_PASS | PASS | `finds-results-prod` created/listed |
+| R2_BINDING_PASS | PASS | `FIND_BUCKET` → `finds-results-prod` in wrangler.toml; `/health` r2 ok |
+| R2_MISS_HIT_PASS | PASS | Live Worker MISS then HIT |
+| GEMINI_SECRET_PASS | PASS | `wrangler secret put GEMINI_API_KEY` in deploy |
+| GEMINI_3_6_MIGRATION_PASS | PASS | `/version` → `gemini-3.6-flash` |
+| GEMINI_PRODUCTION_PASS | PASS | Live hotspots with Gemini provenance, no fallback notes |
+| GEMINI_DATA_INTEGRITY_PASS | PASS | `mergeGeminiScores` + pipeline tests |
+| NASA_PRODUCTION_PASS | PASS | Live `sourceAgency: NASA` + products in provenance |
+| LIVE_WORKER_PASS | PASS | `https://finds-worker.gunnchos-finds.workers.dev` |
+| LIVE_PAGES_PASS | PASS | `https://finds-web-4j5.pages.dev` (200 shell) |
+| PRODUCTION_SMOKE_PASS | PASS | `npm run test:production` local + deploy smoke |
+| PWA_PASS | PASS | manifest + icons on live Pages |
 | BUILD_PASS | PASS | `npm run verify` green |
-| TEST_PASS | PASS | 15 unit/integration + 6 e2e |
-| CI_PASS | PASS | branch CI green |
-| PWA_PASS | PASS | e2e offline shell; live Pages **BLOCKED** |
-| ANDROID_APK_PASS | BLOCKED | production build requires `FINDS_WORKER_URL` |
-| PIXEL_6A_PRODUCTION_PASS | BLOCKED | needs production Worker URL |
-| PINCH_PASS / SPREAD_PASS / SHAKE_PASS | BLOCKED | needs production APK retest |
+| TEST_PASS | PASS | 9 unit + 6 integration/worker + 6 e2e |
+| CI_PASS | PASS | CI on main |
 | ACCESSIBILITY_PASS | PASS | axe e2e — no serious violations |
 | UML_PASS | PASS | 8 diagrams |
-| SECURITY_PASS | PASS | no secrets in `dist/` |
-| PUBLIC_EXPLANATION_PASS | PASS | README honest about pending deploy |
-| RECRUITER_REVIEW_PASS | PASS | Edmund + Yasmine credit preserved |
+| SECURITY_PASS | PASS | no secrets in `dist/` or APK paths scanned |
+| ANDROID_APK_PASS | PASS | Production Worker URL embedded |
+| PIXEL_6A_PRODUCTION_PASS | PARTIAL | Install/launch/logcat PASS; gestures BLOCKED |
+| PINCH_PASS / SPREAD_PASS / SHAKE_PASS | BLOCKED | Requires physical device observation |
+| PUBLIC_EXPLANATION_PASS | PASS | README updated with live URLs |
+| RECRUITER_REVIEW_PASS | PASS | Edmund Gunn Jr. + Yasmine Dweir credit preserved |
 | CLAIMS_EVIDENCE_PASS | PASS | this matrix updated honestly |
-| V2_DRAFT_RELEASE_PASS | BLOCKED | awaiting production deploy |
-| RELEASE_READY_PASS | BLOCKED | R2 enablement required |
+| ACTIONS_CLEANUP_PASS | PASS | Retained ci, deploy, codeql, r2-diagnostic; discord-bot trimmed |
+| V2_DRAFT_RELEASE_PASS | BLOCKED | Awaiting full deploy green + physical Pixel gestures |
+| RELEASE_READY_PASS | BLOCKED | Physical pinch/spread/shake + final deploy workflow green |

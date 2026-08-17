@@ -34,6 +34,7 @@ spawnSync('adb', ['-d', 'reverse', '--remove-all'], { stdio: 'inherit' });
 console.log('Force-stop and launch FINDS…');
 adb(['shell', 'am', 'force-stop', PKG]);
 adb(['shell', 'am', 'start', '-n', `${PKG}/.MainActivity`]);
+spawnSync('sleep', ['3']);
 const pid = adb(['shell', 'pidof', PKG]);
 if (!pid) {
   console.error('FINDS did not start');
