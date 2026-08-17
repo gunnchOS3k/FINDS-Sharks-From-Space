@@ -6,25 +6,204 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  preflight:
     runs-on: ubuntu-latest
-    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    steps:
+      - name: Verify Cloudflare deployment secrets
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CF_TOKEN}" ]; then
+            echo "ERROR: CLOUDFLARE_API_TOKEN is not configured in repository secrets."
+            exit 1
+          fi
+          if [ -z "${CF_ACCOUNT}" ]; then
+            echo "ERROR: CLOUDFLARE_ACCOUNT_ID is not configured in repository secrets."
+            exit 1
+          fi
+          echo "Cloudflare secret names verified (values not printed)."
+
+  deploy:
+    needs: preflight
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - run: npm ci
       - run: npm run verify
-      - uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config api/worker/wrangler.toml
-      - run: VITE_API_BASE="https://finds-worker.gunnchos.workers.dev" npm run build
-      - uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=finds-web
+
+      - name: Ensure production R2 bucket exists
+        run: |
+          set -euo pipefail
+          npx wrangler r2 bucket create finds-results-prod --config api/worker/wrangler.toml 2>&1 | tee /tmp/r2-create.log || true
+          if grep -qi "already exists" /tmp/r2-create.log; then
+            echo "R2 bucket finds-results-prod already exists."
+          elif grep -qi "Created bucket" /tmp/r2-create.log; then
+            echo "R2 bucket finds-results-prod created."
+          else
+            echo "R2 bucket status:"
+            cat /tmp/r2-create.log
+          fi
+          npx wrangler r2 bucket list --config api/worker/wrangler.toml | grep -q finds-results-prod
+
+      - name: Deploy Cloudflare Worker
+        id: worker_deploy
+        run: |
+          set -euo pipefail
+          DEPLOY_LOG=/tmp/wrangler-deploy.log
+          npx wrangler deploy --config api/worker/wrangler.toml 2>&1 | tee "$DEPLOY_LOG"
+          WORKER_URL="$(grep -Eo 'https://[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+\.workers\.dev' "$DEPLOY_LOG" | head -1 || true)"
+          if [ -z "$WORKER_URL" ]; then
+            WORKER_URL="$(npx wrangler deployments list --config api/worker/wrangler.toml --json 2>/dev/null | node -e "
+              let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+                try {
+                  const rows=JSON.parse(d);
+                  const url=rows?.[0]?.url || rows?.[0]?.deployment?.url;
+                  if(url) console.log(url);
+                } catch {}
+              });
+            " || true)"
+          fi
+          if [ -z "$WORKER_URL" ]; then
+            echo "ERROR: Could not discover deployed Worker URL from wrangler output."
+            exit 1
+          fi
+          echo "Discovered Worker URL: $WORKER_URL"
+          echo "worker_url=$WORKER_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Worker health and version
+        env:
+          WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
+        run: |
+          set -euo pipefail
+          HEALTH="$(curl -fsS "$WORKER_URL/health")"
+          echo "$HEALTH" | node -e "
+            const h=JSON.parse(require('fs').readFileSync(0,'utf8'));
+            if(h.checks?.geminiKey!=='configured') {
+              console.error('ERROR: GEMINI_API_KEY not configured on production Worker (geminiKey:', h.checks?.geminiKey, ')');
+              process.exit(1);
+            }
+            if(h.checks?.r2!=='ok') {
+              console.error('ERROR: R2 binding not ok:', h.checks?.r2);
+              process.exit(1);
+            }
+            console.log('Health OK:', JSON.stringify(h.checks));
+          "
+          VERSION="$(curl -fsS "$WORKER_URL/version")"
+          echo "$VERSION" | node -e "
+            const v=JSON.parse(require('fs').readFileSync(0,'utf8'));
+            if(!String(v.geminiModelDefault||'').includes('gemini-3.6-flash')) {
+              console.error('ERROR: Expected gemini-3.6-flash default, got', v.geminiModelDefault);
+              process.exit(1);
+            }
+            console.log('Version OK:', v.geminiModelDefault);
+          "
+
+      - name: Production hotspot smoke (NASA + Gemini)
+        env:
+          WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
+        run: |
+          set -euo pipefail
+          CACHE_BUST="closeout-$(date +%s)"
+          BODY="{\"region\":\"new-york-bight\",\"n\":37,\"bbox\":[-74.48,39.52,-71.52,41.18]}"
+          MISS="$(curl -fsS -D /tmp/h1.headers -o /tmp/h1.json -X POST "$WORKER_URL/api/hotspots" \
+            -H "content-type: application/json" -H "x-request-id: $CACHE_BUST-miss" \
+            --data "$BODY")"
+          XCACHE1="$(grep -i '^x-cache:' /tmp/h1.headers | awk '{print $2}' | tr -d '\r' || true)"
+          echo "First request x-cache: ${XCACHE1:-unknown}"
+          echo "$MISS" | node -e "
+            const p=JSON.parse(require('fs').readFileSync(0,'utf8'));
+            if(p.schemaVersion!=='1.0.0') throw new Error('bad schema');
+            if(p.provenance?.sourceAgency!=='NASA') throw new Error('missing NASA provenance');
+            if(!p.provenance?.model || !String(p.provenance.model).includes('gemini-3.6-flash')) {
+              throw new Error('Gemini model not in provenance: '+p.provenance?.model);
+            }
+            if(!Array.isArray(p.hotspots)||!p.hotspots.length) throw new Error('no hotspots');
+            const q=p.provenance?.qualityNotes||[];
+            if(q.some(n=>/deterministic NASA-derived scores only|Gemini key not configured|Gemini unavailable|Gemini HTTP/i.test(n))) {
+              throw new Error('Gemini fallback used: '+q.join('; '));
+            }
+            console.log('Hotspot smoke OK:', p.hotspots.length, 'cells, model', p.provenance.model);
+          "
+          HIT="$(curl -fsS -D /tmp/h2.headers -o /tmp/h2.json -X POST "$WORKER_URL/api/hotspots" \
+            -H "content-type: application/json" -H "x-request-id: $CACHE_BUST-hit" \
+            --data "$BODY")"
+          XCACHE2="$(grep -i '^x-cache:' /tmp/h2.headers | awk '{print $2}' | tr -d '\r' || true)"
+          echo "Second request x-cache: ${XCACHE2:-unknown}"
+          if [ "$XCACHE1" != "MISS" ] && [ "$XCACHE2" != "HIT" ]; then
+            echo "WARNING: Expected MISS then HIT; got $XCACHE1 then $XCACHE2"
+          fi
+          if [ "$XCACHE2" != "HIT" ]; then
+            echo "ERROR: Second identical request was not a cache HIT"
+            exit 1
+          fi
+
+      - name: Build frontend against discovered Worker URL
+        env:
+          WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
+        run: |
+          set -euo pipefail
+          VITE_API_BASE="$WORKER_URL" npm run build
+          node -e "
+            const fs=require('fs'); const path=require('path');
+            function walk(d){ for(const f of fs.readdirSync(d,{withFileTypes:true})) {
+              const p=path.join(d,f.name);
+              if(f.isDirectory()) walk(p);
+              else if(/\\.(js|html)$/.test(f.name)) {
+                const t=fs.readFileSync(p,'utf8');
+                for (const bad of ['localhost','127.0.0.1']) {
+                  if(t.includes(bad)) throw new Error('Production bundle contains '+bad+': '+p);
+                }
+                if(!t.includes(process.env.WORKER_URL)) throw new Error('Bundle missing Worker URL in '+p);
+              }
+            }}
+            walk('dist');
+            console.log('Production bundle references Worker URL only.');
+          "
+
+      - name: Deploy Cloudflare Pages
+        id: pages_deploy
+        run: |
+          set -euo pipefail
+          PAGES_LOG=/tmp/pages-deploy.log
+          npx wrangler pages deploy dist --project-name=finds-web --commit-dirty=true 2>&1 | tee "$PAGES_LOG"
+          PAGES_URL="$(grep -Eo 'https://[a-zA-Z0-9.-]+\.pages\.dev' "$PAGES_LOG" | head -1 || true)"
+          if [ -z "$PAGES_URL" ]; then
+            PAGES_URL="https://finds-web.pages.dev"
+          fi
+          echo "Discovered Pages URL: $PAGES_URL"
+          echo "pages_url=$PAGES_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Pages shell
+        env:
+          PAGES_URL: ${{ steps.pages_deploy.outputs.pages_url }}
+          WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
+        run: |
+          set -euo pipefail
+          curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/" | grep -q 200
+          curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/manifest.webmanifest" | grep -q 200
+          curl -fsS -o /dev/null -w "%{http_code}" "$PAGES_URL/pwa-192x192.png" | grep -q 200
+          INDEX="$(curl -fsS "$PAGES_URL/")"
+          echo "$INDEX" | grep -q 'FINDS'
+          npm run test:production -- --worker "$WORKER_URL" --pages "$PAGES_URL"
+
+      - name: Record deployment URLs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
+          PAGES_URL: ${{ steps.pages_deploy.outputs.pages_url }}
+        run: |
+          gh variable set FINDS_WORKER_URL --body "$WORKER_URL" || true
+          gh variable set FINDS_PAGES_URL --body "$PAGES_URL" || true
+          echo "FINDS_WORKER_URL=$WORKER_URL"
+          echo "FINDS_PAGES_URL=$PAGES_URL"

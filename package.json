@@ -21,6 +21,8 @@
     "diagrams:check": "node scripts/render-uml.mjs --check",
     "assets": "node scripts/generate-assets.mjs",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run diagrams:check && npm run build",
+    "test:production": "node scripts/test-production.mjs",
+    "test:production:cache": "node scripts/test-production.mjs --cache",
     "android:sync": "npm run build && npx cap sync android",
     "android:build": "node scripts/android-build.mjs",
     "android:install": "node scripts/android-install.mjs",

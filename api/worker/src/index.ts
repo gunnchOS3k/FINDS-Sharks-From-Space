@@ -1,4 +1,11 @@
-import { CACHE_TTL_SECONDS, DISCLAIMER, PIPELINE_VERSION, SCHEMA_VERSION, type GenerateResponse } from '../../../shared/types';
+import {
+  CACHE_TTL_SECONDS,
+  DEFAULT_GEMINI_MODEL,
+  DISCLAIMER,
+  PIPELINE_VERSION,
+  SCHEMA_VERSION,
+  type GenerateResponse,
+} from '../../../shared/types';
 import { cacheObjectKey, stableCacheKey } from '../../../shared/cacheKey';
 import { analyzeWithGemini } from '../../../shared/gemini';
 import { fetchNasaObservations, NASA_PRODUCTS } from '../../../shared/nasa';
@@ -120,7 +127,7 @@ async function handleVersion(request: Request, env: Env): Promise<Response> {
       name: 'finds-worker',
       schemaVersion: SCHEMA_VERSION,
       pipelineVersion: PIPELINE_VERSION,
-      geminiModelDefault: env.GEMINI_MODEL || 'gemini-2.5-flash',
+      geminiModelDefault: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
     },
     200,
     request,
@@ -133,7 +140,7 @@ async function handleGenerate(request: Request, env: Env, id: string): Promise<R
   const parsed = validateGenerateRequest(parseJsonBody(raw));
   const region = findRegion(parsed.region)!;
   const bbox = regionToBBox(parsed.region, parsed.bbox);
-  const model = env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash';
+  const model = env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
 
   if (env.RATE_LIMITER) {
     const ip = request.headers.get('CF-Connecting-IP') || 'anonymous';
