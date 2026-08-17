@@ -12,7 +12,7 @@ Open http://localhost:3000. Generate uses `/demo.json` if `VITE_API_BASE` is uns
 ## Live Worker
 
 1. Copy `.env.example` to `api/worker/.dev.vars`.
-2. Set `GEMINI_API_KEY` (server-side only). Optional: `GEMINI_MODEL=gemini-2.5-flash`.
+2. Set `GEMINI_API_KEY` (server-side only). Optional: `GEMINI_MODEL=gemini-3.6-flash` (production default).
 3. `npm run worker:dev`
 4. `VITE_API_BASE=http://127.0.0.1:8787 npm run dev`
 

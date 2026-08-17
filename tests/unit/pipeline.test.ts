@@ -66,7 +66,7 @@ describe('cache key', () => {
       n: 80,
       observationDate: '2026-08-14',
       variables: ['sst', 'chlorophyll_a'],
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
     };
     expect(stableCacheKey(base)).not.toEqual(stableCacheKey({ ...base, observationDate: '2026-08-15' }));
     expect(isCacheFresh(new Date().toISOString(), 3600)).toBe(true);

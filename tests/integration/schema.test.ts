@@ -16,11 +16,11 @@ describe('release schema contracts', () => {
       n: 80,
       observationDate: '2026-08-14',
       variables: ['chlorophyll_a', 'sst'],
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
     });
     expect(key).toContain('hawaiian-islands');
     expect(key).toContain('2026-08-14');
-    expect(key).toContain('gemini-2.5-flash');
+    expect(key).toContain('gemini-3.6-flash');
   });
 
   it('bounds generate input', () => {

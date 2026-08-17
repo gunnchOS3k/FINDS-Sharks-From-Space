@@ -79,7 +79,7 @@ Official NASA GIBS (no visitor Earthdata login):
 - GIBS GetFeatureInfo is **not** enabled on this endpoint.
 - WMTS DescribeDomains for MUR SST included data through `2026-08-16` at audit time.
 
-Gemini: official models page lists `gemini-2.5-flash` and `gemini-3.5-flash` as stable. Default will be env `GEMINI_MODEL` with verified fallback `gemini-2.5-flash`.
+Gemini: production default is `gemini-3.6-flash` per [Google AI Gemini 3.6 Flash docs](https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash). Override with env `GEMINI_MODEL` when needed.
 
 ## Decision
 

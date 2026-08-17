@@ -105,4 +105,4 @@ export const MIN_POINTS = 10;
 export const DEFAULT_POINTS = 80;
 export const MAX_BODY_BYTES = 8_192;
 export const CACHE_TTL_SECONDS = 6 * 60 * 60;
-export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.6-flash';
