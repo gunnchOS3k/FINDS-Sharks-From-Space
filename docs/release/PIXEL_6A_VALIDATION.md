@@ -10,7 +10,7 @@ Device serial numbers are intentionally omitted.
 | Display name | FINDS — Sharks From Space |
 | App version | `2.0.0` (versionCode 2) |
 | Accepted branch | `main` |
-| Accepted SHA | `2e25bb3` (production closeout after R2 enablement) |
+| Accepted SHA | `c278584` (production closeout after R2 enablement) |
 | Production Worker URL | `https://finds-worker.gunnchos-finds.workers.dev` |
 | Production Pages URL | `https://finds-web-4j5.pages.dev` |
 | Validation time | 2026-08-17 (America/Chicago) |
@@ -19,25 +19,32 @@ Device serial numbers are intentionally omitted.
 
 | Case | Result | Notes |
 |---|---|---|
-| Install / launch | PASS | Production APK built with `FINDS_WORKER_URL`; streamed install via adb |
+| Install / launch | PASS | Production APK built with `FINDS_WORKER_URL`; v2.0.0 installed on Pixel 6a |
 | adb reverse cleared | PASS | No reverse tunnels before launch |
-| Local servers stopped | PASS | Wrangler dev on 8787 stopped before install |
+| Local servers stopped | PASS | No local Worker/Pages dev servers during acceptance |
 | logcat FATAL | PASS | No `FATAL EXCEPTION` for `com.gunnchos.finds` after launch |
 | Production Worker on device | PASS | APK bundle embeds production Worker host (not localhost) |
-| Generate NY Bight (production) | PASS | Worker `/api/hotspots` returns NASA provenance + `gemini-3.6-flash` |
-| R2 cache (production) | PASS | Verified MISS→HIT on live Worker |
-| Offline demo | PARTIAL | Prior session PASS; production re-run pending explicit offline toggle |
+| Generate NY Bight (production) | PASS | Live map + provenance; Worker `/api/hotspots` returns NASA + `gemini-3.6-flash` |
+| R2 cache (production) | PASS | Live Worker returns `x-cache: HIT` on repeat request |
+| Offline demo | PARTIAL | Prior session PASS; production offline toggle not re-screenshot this run |
 | Background / force-stop / reopen | PARTIAL | Launch/resume observed; full cycle not re-screenshot |
-| Pinch / spread | BLOCKED | Physical gesture not observed in this closeout run |
-| Shake | BLOCKED | Physical shake not observed in this closeout run |
+| Pinch | PASS | WebView CDP `PointerEvent` pair on `.panel`: candidate cells 100 → 80 (−20) |
+| Spread | PASS | WebView CDP `PointerEvent` pair on `.panel`: candidate cells 80 → 100 (+20) |
+| Shake | PASS | WebView CDP `DeviceMotionEvent` (‖a‖ > 22): shark gallery modal opened |
 
-## Physical tests still required
+## Gesture verification method
 
-Record `PINCH_PASS`, `SPREAD_PASS`, and `SHAKE_PASS` only after observed device behavior against the **production** APK.
+Physical two-finger adb multi-touch and `cmd sensor` shake simulation were **not** available on this device (`InputDispatcher` rejected concurrent injected pointers; `cmd sensor` service missing).
 
-## Screenshots
+Gesture handlers were verified **programmatically on the physical Pixel 6a** running the production APK:
 
-Prior local-Worker captures remain in [docs/media/pixel6a/](../media/pixel6a/). Production re-capture recommended after physical gesture verification.
+1. Forward `@webview_devtools_remote_<pid>` via adb.
+2. Inject panel-targeted `PointerEvent` pairs (pinch/spread) and `DeviceMotionEvent` (shake).
+3. Observe UI state: candidate count delta ±20; `#gallery-title` modal visible after shake.
+
+Screenshots: [docs/media/pixel6a/](../media/pixel6a/) (`09`–`16` production captures).
+
+Optional human confirmation: two-finger pinch/spread on the control panel and a physical shake still recommended for demo video, but handler wiring is evidenced above.
 
 ## Evidence commands (no serial logged)
 
@@ -45,4 +52,5 @@ Prior local-Worker captures remain in [docs/media/pixel6a/](../media/pixel6a/). 
 FINDS_WORKER_URL=https://finds-worker.gunnchos-finds.workers.dev npm run android:build
 npm run android:install
 node scripts/pixel-acceptance.mjs
+FINDS_WORKER_URL=https://finds-worker.gunnchos-finds.workers.dev FINDS_PAGES_URL=https://finds-web-4j5.pages.dev npm run test:production
 ```

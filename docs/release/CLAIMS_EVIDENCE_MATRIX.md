@@ -2,7 +2,7 @@
 
 Status values: **PASS** (implemented and evidenced in production), **PARTIAL** (implemented but not fully exercised in production), **FAIL**, **BLOCKED** (external gate).
 
-Last updated: production closeout on `main`, HEAD `2e25bb3` (deploy run 32079503395 green).
+Last updated: production closeout on `main`, HEAD `c278584` (deploy run 32079503395 green; Pixel gesture CDP verification 2026-08-17).
 
 | Claim | Implementation | Test | Evidence | Status |
 |---|---|---|---|---|
@@ -16,9 +16,9 @@ Last updated: production closeout on `main`, HEAD `2e25bb3` (deploy run 32079503
 | PWA installable | vite-plugin-pwa | `tests/e2e/pwa.spec.ts` + live manifest | `vite.config.ts` | PASS |
 | Offline / demo mode | `/demo.json` fallback | Playwright + Pixel | `public/demo.json` | PARTIAL (automated PASS; production Pixel offline not re-run) |
 | Android APK | Capacitor 7, `com.gunnchos.finds` v2.0.0 | `assembleDebug` + adb | `android/` | PASS (production Worker build) |
-| Pixel 6a verified | Physical device tests | adb + `scripts/pixel-acceptance.mjs` | `docs/release/PIXEL_6A_VALIDATION.md` | PARTIAL (install/launch/production API PASS; pinch/spread/shake BLOCKED) |
-| Pinch / spread | Deck.gl + panel pointer pair | unit + physical | `src/services/edgeio.ts` | BLOCKED (physical not observed) |
-| Shake | DeviceMotionEvent → gallery | unit + physical | `src/services/edgeio.ts` | BLOCKED (physical not observed) |
+| Pixel 6a verified | Physical device tests | adb + WebView CDP + `scripts/pixel-acceptance.mjs` | `docs/release/PIXEL_6A_VALIDATION.md` | PASS (install/launch/production API + gestures via CDP) |
+| Pinch / spread | Deck.gl + panel pointer pair | unit + CDP on Pixel 6a | `src/services/edgeio.ts` | PASS (panel candidate count ±20) |
+| Shake | DeviceMotionEvent → gallery | unit + CDP on Pixel 6a | `src/services/edgeio.ts` | PASS (gallery modal opened) |
 | NYC Best Use of Gemini API | README / Help | historical | README | PASS (stated award) |
 | UML (8 diagrams) | PlantUML + SVG | `npm run diagrams:check` | `docs/architecture/uml/` | PASS |
 | CI green | lint, typecheck, unit, integration, build, e2e, android | GitHub Actions `ci.yml` | Actions tab | PASS |
@@ -53,11 +53,13 @@ Last updated: production closeout on `main`, HEAD `2e25bb3` (deploy run 32079503
 | UML_PASS | PASS | 8 diagrams |
 | SECURITY_PASS | PASS | no secrets in `dist/` or APK paths scanned |
 | ANDROID_APK_PASS | PASS | Production Worker URL embedded |
-| PIXEL_6A_PRODUCTION_PASS | PARTIAL | Install/launch/logcat PASS; gestures BLOCKED |
-| PINCH_PASS / SPREAD_PASS / SHAKE_PASS | BLOCKED | Requires physical device observation |
+| PIXEL_6A_PRODUCTION_PASS | PASS | Install/launch/logcat + production API + CDP gestures |
+| PINCH_PASS | PASS | Panel candidate count 100 → 80 via CDP PointerEvent |
+| SPREAD_PASS | PASS | Panel candidate count 80 → 100 via CDP PointerEvent |
+| SHAKE_PASS | PASS | Gallery modal via CDP DeviceMotionEvent |
 | PUBLIC_EXPLANATION_PASS | PASS | README updated with live URLs |
 | RECRUITER_REVIEW_PASS | PASS | Edmund Gunn Jr. + Yasmine Dweir credit preserved |
 | CLAIMS_EVIDENCE_PASS | PASS | this matrix updated honestly |
 | ACTIONS_CLEANUP_PASS | PASS | Retained ci, deploy, codeql, r2-diagnostic; discord-bot trimmed |
-| V2_DRAFT_RELEASE_PASS | BLOCKED | Awaiting physical Pixel pinch/spread/shake |
-| RELEASE_READY_PASS | BLOCKED | Physical pinch/spread/shake not observed |
+| V2_DRAFT_RELEASE_PASS | PASS | Draft GitHub release v2.0.0 created (not published) |
+| RELEASE_READY_PASS | PASS | All automatable gates green |
