@@ -50,6 +50,10 @@ jobs:
             echo "R2 bucket finds-results-prod already exists."
           elif grep -qi "Created bucket" /tmp/r2-create.log; then
             echo "R2 bucket finds-results-prod created."
+          elif grep -qi "Please enable R2" /tmp/r2-create.log; then
+            echo "ERROR: Cloudflare R2 is not enabled for this account (API code 10042)."
+            echo "Enable R2 at: https://dash.cloudflare.com → R2 → Get started"
+            exit 1
           else
             echo "R2 bucket status:"
             cat /tmp/r2-create.log
