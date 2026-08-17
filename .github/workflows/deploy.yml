@@ -256,6 +256,8 @@ jobs:
           VITE_API_BASE="$WORKER_URL" npm run build
           node -e "
             const fs=require('fs'); const path=require('path');
+            const worker=process.env.WORKER_URL;
+            let hasWorkerUrl=false;
             function walk(d){ for(const f of fs.readdirSync(d,{withFileTypes:true})) {
               const p=path.join(d,f.name);
               if(f.isDirectory()) walk(p);
@@ -264,11 +266,12 @@ jobs:
                 for (const bad of ['localhost','127.0.0.1']) {
                   if(t.includes(bad)) throw new Error('Production bundle contains '+bad+': '+p);
                 }
-                if(!t.includes(process.env.WORKER_URL)) throw new Error('Bundle missing Worker URL in '+p);
+                if(t.includes(worker)) hasWorkerUrl=true;
               }
             }}
             walk('dist');
-            console.log('Production bundle references Worker URL only.');
+            if(!hasWorkerUrl) throw new Error('Production bundle missing Worker URL '+worker);
+            console.log('Production bundle references Worker URL and excludes localhost.');
           "
 
       - name: Deploy Cloudflare Pages
