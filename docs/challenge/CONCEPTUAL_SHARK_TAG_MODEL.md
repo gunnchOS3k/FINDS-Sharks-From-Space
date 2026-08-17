@@ -14,7 +14,7 @@ This document satisfies the NASA Space Apps **Sharks from Space** prompt to *sug
 ## Design goals
 
 1. **Animal welfare** — minimally invasive attachment; duty-cycled sensors; no continuous high-power uplink.
-2. **Privacy** — coarse public heatmaps; raw tracks restricted to researchers with consent.
+2. **Privacy & data governance** — coarse public heatmaps only; finer-resolution tag tracks would require, as applicable, institutional research governance, wildlife/fisheries/tagging permits, conservation agreements, and partner data-sharing terms before any release.
 3. **Scientific coupling** — tag batches are a separate stream from NASA SST/chlorophyll scoring; fusion would require validated models, not v2.x heuristics.
 4. **Honest labeling** — all demo tag JSON carries `provenance: SYNTHETIC` and `synthetic: true`.
 
@@ -63,7 +63,7 @@ NASA MUR SST and PACE/VIIRS chlorophyll in FINDS are **environmental** inputs. A
 
 - Not a marine-safety or lifeguard product.
 - No encouragement to approach tagged or untagged sharks.
-- Institutional IRB / tagging permits would be required before any real deployment — out of scope for this hackathon codebase.
+- IACUC or equivalent institutional animal-care/ethics review, plus all applicable wildlife, fisheries, tagging, and research permits, would be required before any real deployment — out of scope for this hackathon codebase.
 
 ## Version history
 
