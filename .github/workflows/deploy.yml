@@ -174,7 +174,19 @@ jobs:
           WORKER_URL: ${{ steps.worker_deploy.outputs.worker_url }}
         run: |
           set -euo pipefail
-          HEALTH="$(curl -fsS "$WORKER_URL/health")"
+          for attempt in $(seq 1 36); do
+            if curl -fsS -m 20 "$WORKER_URL/health" >/tmp/health.json 2>/dev/null; then
+              echo "Health reachable on attempt ${attempt}"
+              break
+            fi
+            if [ "$attempt" -eq 36 ]; then
+              echo "ERROR: Worker health not reachable at $WORKER_URL after 6 minutes"
+              exit 1
+            fi
+            echo "Waiting for workers.dev TLS/DNS (attempt ${attempt}/36)..."
+            sleep 10
+          done
+          HEALTH="$(cat /tmp/health.json)"
           echo "$HEALTH" | node -e "
             const h=JSON.parse(require('fs').readFileSync(0,'utf8'));
             if(h.checks?.geminiKey!=='configured') {
