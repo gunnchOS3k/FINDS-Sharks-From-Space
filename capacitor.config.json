@@ -1,0 +1,11 @@
+{
+  "appId": "com.gunnchos.finds",
+  "appName": "FINDS — Sharks From Space",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
