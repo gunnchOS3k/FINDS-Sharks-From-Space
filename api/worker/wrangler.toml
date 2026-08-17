@@ -2,6 +2,7 @@ name = "finds-worker"
 main = "src/index.ts"
 compatibility_date = "2026-01-15"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
 
 [vars]
 PIPELINE_VERSION = "2026.08.1"

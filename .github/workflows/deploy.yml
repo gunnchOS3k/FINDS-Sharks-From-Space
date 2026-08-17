@@ -118,6 +118,32 @@ jobs:
           printf '%s' "$GEMINI_API_KEY" | npx wrangler secret put GEMINI_API_KEY --config api/worker/wrangler.toml
           echo "GEMINI_API_KEY secret name configured on Worker (value not printed)."
 
+      - name: Ensure workers.dev subdomain registered
+        run: |
+          set -euo pipefail
+          SUBDOMAIN="gunnchos-finds"
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain"
+          STATUS="$(curl -sS -o /tmp/subdomain.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "$API")"
+          if [ "$STATUS" = "200" ]; then
+            CURRENT="$(node -e "const j=JSON.parse(require('fs').readFileSync('/tmp/subdomain.json','utf8')); console.log(j.result?.subdomain||'');")"
+            if [ -n "$CURRENT" ]; then
+              echo "workers.dev subdomain already registered: ${CURRENT}"
+              exit 0
+            fi
+          fi
+          echo "Registering workers.dev subdomain: ${SUBDOMAIN}"
+          curl -fsS -X PUT \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data "{\"subdomain\":\"${SUBDOMAIN}\"}" \
+            "$API" | node -e "
+              const j=JSON.parse(require('fs').readFileSync(0,'utf8'));
+              if(!j.success) { console.error('Subdomain registration failed:', j.errors?.[0]?.message||'unknown'); process.exit(1); }
+              console.log('workers.dev subdomain registered:', j.result?.subdomain||'${SUBDOMAIN}');
+            "
+
       - name: Deploy Cloudflare Worker
         id: worker_deploy
         run: |
