@@ -10,7 +10,7 @@ NASA Space Apps NYC | collaborators **Edmund Gunn Jr.** and **Yasmine Dweir**
 **Try FINDS:** [https://finds-web-4j5.pages.dev](https://finds-web-4j5.pages.dev)  
 **API:** [https://finds-worker.gunnchos-finds.workers.dev](https://finds-worker.gunnchos-finds.workers.dev) serves `/health`, `/version`, and `POST /api/hotspots`.
 
-[How FINDS works](docs/ARCHITECTURE.md) · [Install Android](docs/GETTING_STARTED.md#android) · [NASA provenance](docs/data/NASA_DATA_PIPELINE.md) · [Scientific limitations](docs/data/SCIENTIFIC_LIMITATIONS.md) · [Pixel 6a evidence](docs/release/PIXEL_6A_VALIDATION.md) · [Claims vs evidence](docs/release/CLAIMS_EVIDENCE_MATRIX.md)
+[How FINDS works](docs/ARCHITECTURE.md) · [Install Android](docs/GETTING_STARTED.md#android) · [NASA provenance](docs/data/NASA_DATA_PIPELINE.md) · [Scientific limitations](docs/data/SCIENTIFIC_LIMITATIONS.md) · [Space Apps alignment](docs/release/SPACE_APPS_SUBMISSION_ALIGNMENT.md) · [Conceptual tag model](docs/challenge/CONCEPTUAL_SHARK_TAG_MODEL.md) · [Pixel 6a evidence](docs/release/PIXEL_6A_VALIDATION.md) · [Claims vs evidence](docs/release/CLAIMS_EVIDENCE_MATRIX.md)
 
 ![CI](https://github.com/gunnchOS3k/FINDS-Sharks-From-Space/actions/workflows/ci.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -25,7 +25,7 @@ NASA Space Apps NYC | collaborators **Edmund Gunn Jr.** and **Yasmine Dweir**
 
 ## Recruiter snapshot
 
-FINDS began as a NASA Space Apps 2025 hackathon prototype that won **NYC Best Use of Gemini API**. This release adds a NASA observation pipeline, a Cloudflare Worker with R2 cache, Gemini 3.6 Flash structured scoring, tests, UML, PWA packaging, and a Capacitor Android app validated on Pixel 6a.
+FINDS began as a NASA Space Apps 2025 hackathon prototype that won **NYC Best Use of Gemini API** (local NYC award). Post-hackathon **v2.x** adds a NASA GIBS observation pipeline, Cloudflare Worker with R2 cache, Gemini 3.6 Flash structured scoring, tests, UML, PWA packaging, and a Capacitor Android app validated on Pixel 6a. A **conceptual shark tag model** is documented for the challenge but is not deployed.
 
 **Team:** Edmund Gunn Jr. and Yasmine Dweir. Public commit history is the verifiable contribution record.
 
@@ -62,7 +62,7 @@ Production smoke (after deploy): `FINDS_WORKER_URL=… FINDS_PAGES_URL=… npm r
 | `src/` | Canonical Vite + React UI |
 | `shared/` | NASA ingest, scoring, Gemini, validation |
 | `api/worker/` | Cloudflare Worker |
-| `docs/architecture/uml/` | PlantUML + SVG (8 diagrams) |
+| `docs/architecture/uml/` | PlantUML + SVG (9 diagrams) |
 | `android/` | Capacitor wrapper |
 
 See [Getting started](docs/GETTING_STARTED.md), [Architecture](docs/ARCHITECTURE.md), [NASA pipeline](docs/data/NASA_DATA_PIPELINE.md), [Provenance](docs/data/DATA_PROVENANCE.md), [Limitations](docs/data/SCIENTIFIC_LIMITATIONS.md).

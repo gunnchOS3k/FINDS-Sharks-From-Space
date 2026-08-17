@@ -3,14 +3,20 @@ left to right direction
 actor Visitor
 actor Recruiter
 actor Engineer
-rectangle FINDS {
-  Visitor --> (Explore ocean map)
-  Visitor --> (Generate hotspots)
-  Visitor --> (Read provenance)
-  Visitor --> (Open shark gallery)
+rectangle "FINDS (live production)" {
+  Visitor --> (Explore habitat-hotspot map)
+  Visitor --> (Generate environmental hotspot scores)
+  Visitor --> (Read NASA provenance)
+  Visitor --> (Open shark species gallery)
   Recruiter --> (Review architecture and award)
   Engineer --> (Run verify and deploy)
-  (Generate hotspots) --> (NASA GIBS ingest)
-  (Generate hotspots) --> (Gemini scoring)
+  (Generate environmental hotspot scores) --> (NASA GIBS ingest)
+  (Generate environmental hotspot scores) --> (Gemini ranking on NASA cells)
+}
+rectangle "Conceptual <<conceptual>>" {
+  (Review tag telemetry design) ..> (Tag ingest API)
+  note right of (Review tag telemetry design)
+    Design doc only — not live
+  end note
 }
 @enduml

@@ -1,65 +1,111 @@
 # Claims vs evidence
 
-Status values: **PASS** (implemented and evidenced in production), **PARTIAL** (implemented but not fully exercised in production), **FAIL**, **BLOCKED** (external gate).
+Status values: **PASS** (implemented and evidenced in production), **QUALIFIED** (implemented with explicit scientific/scope limits documented), **PARTIAL** (implemented but not fully exercised in production), **GAP** (not implemented), **HISTORICAL_ONLY** (Space Apps pitch only; superseded), **BLOCKED** (external gate).
 
-Last updated: production closeout on `main`, HEAD `c278584` (deploy run 32079503395 green; Pixel gesture CDP verification 2026-08-17).
+Last updated: Space Apps / GitHub claim alignment pass on `cursor/space-apps-claim-alignment`.
+
+See also: [SPACE_APPS_SUBMISSION_ALIGNMENT.md](./SPACE_APPS_SUBMISSION_ALIGNMENT.md)
+
+## NASA data & pipeline
 
 | Claim | Implementation | Test | Evidence | Status |
 |---|---|---|---|---|
-| Uses NASA SST | GIBS WMS MUR L4 SST + official colormap | Worker fixture + live probe | `shared/nasa.ts` | PASS (adapter + production Worker) |
-| Uses NASA chlorophyll-a | GIBS PACE/VIIRS fallback | Same | `shared/nasa.ts` | PASS (production) |
-| Gemini 3.6 Flash scores NASA cells only | `DEFAULT_GEMINI_MODEL=gemini-3.6-flash`; `mergeGeminiScores` drops unknown ids | `tests/unit/pipeline.test.ts` | `shared/gemini.ts`, live `/version` | PASS |
-| Gemini server-side only | Client → Worker; no `VITE_` Gemini key | grep `src/` | `src/services/api.ts` | PASS |
-| Cloudflare Worker API | `/health`, `/version`, `POST /api/hotspots` | `tests/worker/worker.test.ts` + production smoke | `api/worker/src/index.ts` | PASS (live) |
-| R2 read-through cache | MISS persist, HIT return | worker integration + live curl | `api/worker/src/index.ts` | PASS (production MISS/HIT) |
-| Deck.gl map | Heatmap + scatter | Playwright + Pixel | `src/components/MapView.tsx` | PASS |
-| PWA installable | vite-plugin-pwa | `tests/e2e/pwa.spec.ts` + live manifest | `vite.config.ts` | PASS |
-| Offline / demo mode | `/demo.json` fallback | Playwright + Pixel | `public/demo.json` | PARTIAL (automated PASS; production Pixel offline not re-run) |
-| Android APK | Capacitor 7, `com.gunnchos.finds` v2.0.0 | `assembleDebug` + adb | `android/` | PASS (production Worker build) |
-| Pixel 6a verified | Physical device tests | adb + WebView CDP + `scripts/pixel-acceptance.mjs` | `docs/release/PIXEL_6A_VALIDATION.md` | PASS (install/launch/production API + gestures via CDP) |
-| Pinch / spread | Deck.gl + panel pointer pair | unit + CDP on Pixel 6a | `src/services/edgeio.ts` | PASS (panel candidate count ±20) |
-| Shake | DeviceMotionEvent → gallery | unit + CDP on Pixel 6a | `src/services/edgeio.ts` | PASS (gallery modal opened) |
-| NYC Best Use of Gemini API | README / Help | historical | README | PASS (stated award) |
-| UML (8 diagrams) | PlantUML + SVG | `npm run diagrams:check` | `docs/architecture/uml/` | PASS |
-| CI green | lint, typecheck, unit, integration, build, e2e, android | GitHub Actions `ci.yml` | Actions tab | PASS |
-| Deploy pipeline | hardened `deploy.yml` + R2 diagnostics | deploy run 32079503395 | Actions deploy run | PASS |
-| Security (no secrets in bundle) | audit scripts + grep | manual + CI | `.gitignore`, `scripts/test-production.mjs` | PASS |
-| Real-time shark warning | Not claimed | N/A | Disclaimer everywhere | PASS (honestly not claimed) |
+| Uses NASA SST (GIBS MUR L4) | GIBS WMS MUR L4 SST + official colormap | Worker fixture + live probe | `shared/nasa.ts`, live provenance | PASS |
+| Uses NASA chlorophyll-a (PACE OCI, VIIRS fallback) | GIBS PACE/VIIRS layers | Same | `shared/nasa.ts` | PASS |
+| No direct NASA shark detection | Environmental rasters only | Scientific limitations doc | `docs/data/SCIENTIFIC_LIMITATIONS.md` | PASS |
+| Colormap decode (not NetCDF) | PNG WMS + XML colormaps | Unit tests | `shared/colormap.ts` | PASS |
+| Observation latency hours–day | GIBS daily layers | Live provenance timestamps | Worker `/api/hotspots` | QUALIFIED |
 
-## Production closeout gates (2026-08-17)
+## Scoring & mathematical framework
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| SST suitability heuristic | `sstSuitability()` | `tests/unit/pipeline.test.ts` | `shared/scoring.ts` | QUALIFIED |
+| Chlorophyll productivity proxy | `chlorophyllSuitability()` | Same | `shared/scoring.ts` | QUALIFIED |
+| SST gradient / front proxy | `gradientBoost()` | Same | `shared/scoring.ts` | QUALIFIED |
+| Combined deterministic score | Weighted sum + cap | Same | `shared/scoring.ts` | QUALIFIED |
+| Validated SDM / occupancy model | Not implemented | N/A | Limitations doc | GAP (honestly not claimed in v2.x) |
+| 24–72h forecast hotspots | Not implemented | N/A | Space Apps About tab | HISTORICAL_ONLY |
+| Bathymetry layer | Not implemented | N/A | — | GAP |
+| SWOT eddy tracking | Not implemented | N/A | Challenge background | GAP |
+| Quantified trophic links phytoplankton→shark | Not implemented | N/A | — | GAP |
+
+## Gemini & AI
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| Gemini 3.6 Flash scores NASA cells only | `DEFAULT_GEMINI_MODEL=gemini-3.6-flash`; `mergeGeminiScores` drops unknown ids | `tests/unit/pipeline.test.ts` | `shared/gemini.ts`, live `/version` | PASS |
+| Gemini does not observe sharks | Prompt + merge guards | Unit tests | `shared/gemini.ts` | PASS |
+| Gemini server-side only | Client → Worker; no `VITE_` Gemini key | grep `src/` | `src/services/api.ts` | PASS |
+| Structured JSON output | Schema-constrained response | Worker tests | `shared/gemini.ts` | PASS |
+
+## Conceptual tag model
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| Conceptual tag design (challenge req B) | Markdown + TypeScript types | Typecheck | `docs/challenge/CONCEPTUAL_SHARK_TAG_MODEL.md`, `shared/tagConcept.ts` | QUALIFIED |
+| Physical tag deployment | None | N/A | — | GAP (by design) |
+| Live tag telemetry in production | None | N/A | — | GAP (by design) |
+| Synthetic tag fixtures labeled | `synthetic: true`, `provenance: SYNTHETIC` | Typecheck | `shared/tagConcept.ts` | PASS |
+| Tag data fused to NASA scores | Not implemented | N/A | — | GAP (honest) |
+| Open tag tracks (Space Apps About) | Not in v2.x | N/A | — | HISTORICAL_ONLY |
+
+## Infrastructure & client
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| Cloudflare Worker API | `/health`, `/version`, `POST /api/hotspots` | `tests/worker/worker.test.ts` + production smoke | `api/worker/src/index.ts` | PASS |
+| R2 read-through cache | MISS persist, HIT return | worker integration + live curl | `api/worker/src/index.ts` | PASS |
+| Deck.gl map | Heatmap + scatter | Playwright + Pixel | `src/components/MapView.tsx` | PASS |
+| PWA installable | vite-plugin-pwa | `tests/e2e/pwa.spec.ts` | `vite.config.ts` | PASS |
+| Offline / demo mode | `/demo.json` fallback | Playwright + Pixel | `public/demo.json` | PARTIAL |
+| Android APK | Capacitor 7, `com.gunnchos.finds` v2.0.0 | `assembleDebug` + adb | `android/` | PASS |
+| Edge IO gestures | Pinch/spread/shake | CDP Pixel 6a | `src/services/edgeio.ts`, `docs/release/PIXEL_6A_VALIDATION.md` | PASS |
+
+## Language, safety & awards
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| Not marine-safety / lifeguard product | Disclaimer everywhere | schema test | `shared/types.ts`, Help UI | PASS |
+| Not real-time shark warnings | Disclaimer + limitations | schema test | README, Help | PASS |
+| “Real-time” = UI only (not satellite/sharks) | Presentations + docs aligned | Manual review | `presentations/README.md` | QUALIFIED |
+| Habitat-hotspot exploration (not detection) | README, Help, gh description | grep review | README, `src/App.tsx` | QUALIFIED |
+| NYC Best Use of Gemini API 2025 | README, Help, CITATION | Event record | README | PASS |
+| NASA Global Winner | Not evidenced | N/A | — | GAP (do not claim) |
+| SharkSafe Index / encounter-risk | Not in v2.x | N/A | Space Apps About | HISTORICAL_ONLY |
+| OpenSpace 3D export | Not in v2.0.0 UI | N/A | Space Apps Project | HISTORICAL_ONLY |
+
+## Documentation & diagrams
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| UML (9 diagrams, live vs conceptual) | PlantUML + SVG | `npm run diagrams:check` | `docs/architecture/uml/` | PASS |
+| Space Apps claim alignment doc | This pass | Manual | `SPACE_APPS_SUBMISSION_ALIGNMENT.md` | PASS |
+| Oct 2025 hackathon vs v2.x timeline | CHANGELOG + README | Manual | CHANGELOG | PASS |
+
+## Pixel 6a validation
+
+| Claim | Implementation | Test | Evidence | Status |
+|---|---|---|---|---|
+| Pixel 6a production APK | Physical device | adb + CDP | `docs/release/PIXEL_6A_VALIDATION.md` | PASS |
+| Pinch / spread (panel density) | Pointer pair simulation | CDP | `scripts/pixel-acceptance.mjs` | PASS |
+| Shake → gallery | DeviceMotionEvent | CDP | Same | PASS |
+| Automated CDP ≠ human UX sign-off | Documented | PIXEL_6A_VALIDATION.md | docs | QUALIFIED |
+
+## Production URLs (live gates)
 
 | Gate | Status | Notes |
 |---|---|---|
-| OWNER_SECRET_CONFIGURATION_PASS | PASS | All 5 secret names present via `gh secret list` |
-| R2_ENTITLEMENT_PASS | PASS | R2 diagnostic run 32078437322 |
-| R2_ACCOUNT_MATCH_PASS | PASS | Deploy preflight + R2 diagnostic |
-| R2_S3_AUTH_PASS | PASS | R2 diagnostic + deploy run 32079349660 |
-| R2_BUCKET_PASS | PASS | `finds-results-prod` created/listed |
-| R2_BINDING_PASS | PASS | `FIND_BUCKET` → `finds-results-prod` in wrangler.toml; `/health` r2 ok |
-| R2_MISS_HIT_PASS | PASS | Live Worker MISS then HIT |
-| GEMINI_SECRET_PASS | PASS | `wrangler secret put GEMINI_API_KEY` in deploy |
-| GEMINI_3_6_MIGRATION_PASS | PASS | `/version` → `gemini-3.6-flash` |
-| GEMINI_PRODUCTION_PASS | PASS | Live hotspots with Gemini provenance, no fallback notes |
-| GEMINI_DATA_INTEGRITY_PASS | PASS | `mergeGeminiScores` + pipeline tests |
-| NASA_PRODUCTION_PASS | PASS | Live `sourceAgency: NASA` + products in provenance |
 | LIVE_WORKER_PASS | PASS | `https://finds-worker.gunnchos-finds.workers.dev` |
-| LIVE_PAGES_PASS | PASS | `https://finds-web-4j5.pages.dev` (200 shell) |
-| PRODUCTION_SMOKE_PASS | PASS | `npm run test:production` local + deploy smoke |
-| PWA_PASS | PASS | manifest + icons on live Pages |
-| BUILD_PASS | PASS | `npm run verify` green |
-| TEST_PASS | PASS | 9 unit + 6 integration/worker + 6 e2e |
-| CI_PASS | PASS | CI on main |
-| ACCESSIBILITY_PASS | PASS | axe e2e — no serious violations |
-| UML_PASS | PASS | 8 diagrams |
-| SECURITY_PASS | PASS | no secrets in `dist/` or APK paths scanned |
-| ANDROID_APK_PASS | PASS | Production Worker URL embedded |
-| PIXEL_6A_PRODUCTION_PASS | PASS | Install/launch/logcat + production API + CDP gestures |
-| PINCH_PASS | PASS | Panel candidate count 100 → 80 via CDP PointerEvent |
-| SPREAD_PASS | PASS | Panel candidate count 80 → 100 via CDP PointerEvent |
-| SHAKE_PASS | PASS | Gallery modal via CDP DeviceMotionEvent |
-| PUBLIC_EXPLANATION_PASS | PASS | README updated with live URLs |
-| RECRUITER_REVIEW_PASS | PASS | Edmund Gunn Jr. + Yasmine Dweir credit preserved |
-| CLAIMS_EVIDENCE_PASS | PASS | this matrix updated honestly |
-| ACTIONS_CLEANUP_PASS | PASS | Retained ci, deploy, codeql, r2-diagnostic; discord-bot trimmed |
-| V2_DRAFT_RELEASE_PASS | PASS | Draft GitHub release v2.0.0 created (not published) |
-| RELEASE_READY_PASS | PASS | All automatable gates green |
+| LIVE_PAGES_PASS | PASS | `https://finds-web-4j5.pages.dev` |
+| GEMINI_PRODUCTION_PASS | PASS | Live hotspots with Gemini provenance |
+| NASA_PRODUCTION_PASS | PASS | Live `sourceAgency: NASA` |
+| BUILD_PASS | PASS | `npm run verify` |
+| PUBLIC_EXPLANATION_PASS | QUALIFIED | Alignment pass updates |
+
+## Release
+
+| Item | Status | Notes |
+|---|---|---|
+| v2.0.0 published | PASS | Do not mutate tag |
+| v2.0.1 suggested | Draft | Docs/claim alignment only — see `V2.0.1_RELEASE_DRAFT.md` |

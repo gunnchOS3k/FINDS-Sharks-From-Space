@@ -246,9 +246,10 @@ export default function App() {
           <div className="modal" role="dialog" aria-modal="true" aria-labelledby="help-title" onClick={(e) => e.stopPropagation()}>
             <h2 id="help-title">About FINDS</h2>
             <p>🏆 NYC Best Use of Gemini API — NASA Space Apps Challenge 2025</p>
-            <p>What is a shark hotspot here? A scored ocean cell, not a confirmed shark.</p>
-            <p>NASA provides GIBS visualizations of MUR SST and PACE/VIIRS chlorophyll-a.</p>
-            <p>Gemini interprets those cells. It does not invent coordinates in live mode.</p>
+            <p>What is a shark hotspot here? A scored ocean cell from NASA SST and chlorophyll-a — not a confirmed shark.</p>
+            <p>NASA provides GIBS visualizations of MUR SST and PACE/VIIRS chlorophyll-a. Data are hours to a day behind processing.</p>
+            <p>Gemini ranks and explains those cells. It does not observe sharks or invent coordinates in live mode.</p>
+            <p>Conceptual tag telemetry is design documentation only — not live in this app.</p>
             <table className="gesture-table">
               <caption>Input support</caption>
               <thead>

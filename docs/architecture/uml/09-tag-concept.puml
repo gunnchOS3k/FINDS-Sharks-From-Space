@@ -1,0 +1,34 @@
+@startuml finds-tag-concept
+title Conceptual shark tag model <<conceptual>>
+note top
+  CONCEPTUAL DESIGN — NOT PHYSICALLY DEPLOYED
+  Synthetic fixtures only; not wired to production NASA scoring
+end note
+class SharkIdentity <<conceptual>> {
+  id
+  speciesLabel
+}
+class TagIdentity <<conceptual>> {
+  tagId
+  firmwareVersion
+  sharkId
+}
+class TagObservation <<conceptual>> {
+  lat
+  lon
+  depthM
+  foragingProxy
+  synthetic
+}
+class TagTelemetryBatch <<conceptual>> {
+  batchId
+  provenance
+}
+class TagTransmissionState <<conceptual>> {
+  linkQuality
+}
+SharkIdentity "1" --> "0..1" TagIdentity
+TagIdentity "1" --> "*" TagObservation
+TagIdentity "1" --> "1" TagTransmissionState
+TagObservation "*" --> "1" TagTelemetryBatch
+@enduml
