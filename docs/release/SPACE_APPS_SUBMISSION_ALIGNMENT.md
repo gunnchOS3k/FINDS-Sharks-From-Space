@@ -58,7 +58,7 @@ Not claimed: validated species distribution model, 24–72h forecast, bathymetry
 
 | Phase | Date | Character |
 |---|---|---|
-| NASA Space Apps NYC hackathon prototype | Oct 4–6, 2025 | Pitch + demo; Gemini-generated plausible points; Worker stub |
+| NASA Space Apps NYC hackathon prototype | Oct 4–6, 2025 (NYC local event; global challenge Oct 4–5) | Pitch + demo; Gemini-generated plausible points; Worker stub |
 | Post-hackathon engineering | 2025–Aug 2026 | NASA GIBS ingest, R2 cache, Gemini 3.6 Flash, tests, Android/Pixel |
 | **v2.0.0 published** | 2026-08-17 | Production Pages + Worker; tag model conceptual-only |
 

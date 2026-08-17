@@ -1,6 +1,6 @@
 # 📊 FINDS Project Presentations
 
-This directory contains presentation materials for the FINDS (Finned Intelligence from Satellite) project.
+This directory contains presentation materials for the FINDS (Finned Intelligence from Space) project.
 
 ## 🎯 **Available Presentations**
 
