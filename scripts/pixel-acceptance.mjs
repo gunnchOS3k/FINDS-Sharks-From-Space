@@ -24,8 +24,12 @@ if (!/device /.test(devices)) {
 }
 
 console.log('Clearing FINDS-specific adb reverse rules…');
-run('adb', ['-d', 'reverse', '--list']);
-run('adb', ['-d', 'reverse', '--remove-all'], { stdio: 'inherit' });
+try {
+  run('adb', ['-d', 'reverse', '--list']);
+} catch {
+  /* no reverse rules */
+}
+spawnSync('adb', ['-d', 'reverse', '--remove-all'], { stdio: 'inherit' });
 
 console.log('Force-stop and launch FINDS…');
 adb(['shell', 'am', 'force-stop', PKG]);

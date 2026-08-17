@@ -274,6 +274,25 @@ jobs:
             console.log('Production bundle references Worker URL and excludes localhost.');
           "
 
+      - name: Ensure Cloudflare Pages project exists
+        run: |
+          set -euo pipefail
+          npx wrangler pages project create finds-web --production-branch=main 2>&1 | tee /tmp/pages-create.log || true
+          if grep -qi "already exists\|Project already exists" /tmp/pages-create.log; then
+            echo "Pages project finds-web already exists."
+          elif grep -qi "Created" /tmp/pages-create.log; then
+            echo "Pages project finds-web created."
+          else
+            cat /tmp/pages-create.log
+            npx wrangler pages project list --json | node -e "
+              let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+                const rows=JSON.parse(d||'[]');
+                if(!rows.some(p=>p.name==='finds-web')) { console.error('ERROR: finds-web Pages project missing'); process.exit(1); }
+                console.log('Pages project finds-web present.');
+              });
+            "
+          fi
+
       - name: Deploy Cloudflare Pages
         id: pages_deploy
         run: |
