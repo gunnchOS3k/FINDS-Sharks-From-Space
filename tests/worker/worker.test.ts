@@ -31,6 +31,17 @@ describe('worker routes', () => {
     expect(bad.status).toBe(405);
   });
 
+  it('allowlists the live Pages origin without extra ALLOWED_ORIGINS', async () => {
+    const response = await worker.fetch(
+      new Request('https://finds.example/health', {
+        headers: { origin: 'https://finds-web-4j5.pages.dev' },
+      }),
+      {},
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('access-control-allow-origin')).toBe('https://finds-web-4j5.pages.dev');
+  });
+
   it('rejects unknown regions', async () => {
     const response = await worker.fetch(
       new Request('http://localhost:3000/api/hotspots', {

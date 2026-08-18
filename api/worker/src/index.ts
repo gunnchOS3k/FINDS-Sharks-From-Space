@@ -51,6 +51,7 @@ function allowedOrigins(env: Env): string[] {
     .filter(Boolean);
   return [
     ...LOCAL_ORIGINS,
+    'https://finds-web-4j5.pages.dev',
     'https://finds-web.pages.dev',
     'https://gunnchos3k.github.io',
     ...extra,
