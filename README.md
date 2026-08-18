@@ -3,7 +3,7 @@
 FINDS helps people explore where environmental ocean conditions may correspond with shark-activity hotspots using NASA observations, Gemini-assisted analysis, and an interactive map.
 
 🏆 **NYC Best Use of Gemini API — NASA Space Apps Challenge 2025**  
-NASA Space Apps NYC | collaborators **Edmund Gunn Jr.** and **Yasmine Dweir**
+NASA Space Apps NYC | collaborators **Yasmine Dweir** and **Edmund Gunn Jr.**
 
 > FINDS is an exploratory research and visualization project. Hotspot scores are not real-time shark warnings and should not be used as a substitute for official marine-safety guidance.
 
