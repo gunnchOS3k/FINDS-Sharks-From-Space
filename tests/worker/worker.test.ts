@@ -21,6 +21,29 @@ function env(bucket?: Map<string, string>): Env {
   return { FIND_BUCKET: r2 as Env['FIND_BUCKET'], ALLOWED_ORIGINS: 'http://localhost:3000' };
 }
 
+function requestUrl(input: RequestInfo | URL): URL {
+  if (input instanceof URL) return input;
+  if (typeof Request !== 'undefined' && input instanceof Request) return new URL(input.url);
+  return new URL(String(input));
+}
+
+function mockNasaFetch(geminiStatus?: number) {
+  return async (input: RequestInfo | URL) => {
+    const parsed = requestUrl(input);
+    if (parsed.hostname === 'generativelanguage.googleapis.com') {
+      return new Response('unavailable', { status: geminiStatus ?? 503 });
+    }
+    if (parsed.searchParams.get('REQUEST') === 'DescribeDomains') {
+      return new Response('<Domains><DimensionDomain><Domain>2026-08-14/2026-08-14/P1D</Domain></DimensionDomain></Domains>');
+    }
+    const layer = parsed.searchParams.get('LAYERS') || parsed.searchParams.get('LAYER') || '';
+    if (layer.includes('Chlorophyll') || layer.includes('PACE') || layer.includes('VIIRS')) {
+      return new Response(encodeChlPng(), { headers: { 'content-type': 'image/png' } });
+    }
+    return new Response(encodePngFixture(), { headers: { 'content-type': 'image/png' } });
+  };
+}
+
 describe('worker routes', () => {
   it('serves health and rejects GET on generate', async () => {
     const health = await worker.fetch(new Request('https://finds.example/health'), env());
@@ -58,17 +81,7 @@ describe('worker routes', () => {
 
 describe('NASA adapter + cache', () => {
   it('returns NASA-derived coordinates and caches HIT after MISS', async () => {
-    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.includes('DescribeDomains')) {
-        return new Response('<Domains><DimensionDomain><Domain>2026-08-14/2026-08-14/P1D</Domain></DimensionDomain></Domains>');
-      }
-      if (url.includes('Chlorophyll') || url.includes('PACE') || url.includes('VIIRS')) {
-        return new Response(encodeChlPng(), { headers: { 'content-type': 'image/png' } });
-      }
-      return new Response(encodePngFixture(), { headers: { 'content-type': 'image/png' } });
-    });
-    vi.stubGlobal('fetch', fetchImpl);
+    vi.stubGlobal('fetch', vi.fn(mockNasaFetch()));
     const bucket = new Map<string, string>();
     const req = () =>
       new Request('http://localhost:3000/api/hotspots', {
@@ -89,20 +102,7 @@ describe('NASA adapter + cache', () => {
   });
 
   it('does not persist transient Gemini failures when a key is configured', async () => {
-    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.includes('generativelanguage.googleapis.com')) {
-        return new Response('unavailable', { status: 503 });
-      }
-      if (url.includes('DescribeDomains')) {
-        return new Response('<Domains><DimensionDomain><Domain>2026-08-14/2026-08-14/P1D</Domain></DimensionDomain></Domains>');
-      }
-      if (url.includes('Chlorophyll') || url.includes('PACE') || url.includes('VIIRS')) {
-        return new Response(encodeChlPng(), { headers: { 'content-type': 'image/png' } });
-      }
-      return new Response(encodePngFixture(), { headers: { 'content-type': 'image/png' } });
-    });
-    vi.stubGlobal('fetch', fetchImpl);
+    vi.stubGlobal('fetch', vi.fn(mockNasaFetch(503)));
     const bucket = new Map<string, string>();
     const workerEnv = { ...env(bucket), GEMINI_API_KEY: 'test-placeholder' };
     const req = () =>
@@ -124,20 +124,7 @@ describe('NASA adapter + cache', () => {
   });
 
   it('bypasses cached NASA-only payloads when a Gemini key is configured', async () => {
-    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.includes('generativelanguage.googleapis.com')) {
-        return new Response('unavailable', { status: 503 });
-      }
-      if (url.includes('DescribeDomains')) {
-        return new Response('<Domains><DimensionDomain><Domain>2026-08-14/2026-08-14/P1D</Domain></DimensionDomain></Domains>');
-      }
-      if (url.includes('Chlorophyll') || url.includes('PACE') || url.includes('VIIRS')) {
-        return new Response(encodeChlPng(), { headers: { 'content-type': 'image/png' } });
-      }
-      return new Response(encodePngFixture(), { headers: { 'content-type': 'image/png' } });
-    });
-    vi.stubGlobal('fetch', fetchImpl);
+    vi.stubGlobal('fetch', vi.fn(mockNasaFetch(503)));
     const bucket = new Map<string, string>();
     const req = () =>
       new Request('http://localhost:3000/api/hotspots', {
