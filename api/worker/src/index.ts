@@ -6,7 +6,7 @@ import {
   SCHEMA_VERSION,
   type GenerateResponse,
 } from '../../../shared/types';
-import { cacheObjectKey, stableCacheKey } from '../../../shared/cacheKey';
+import { cacheObjectKey, shouldServeCachedHotspots, stableCacheKey } from '../../../shared/cacheKey';
 import { analyzeWithGemini } from '../../../shared/gemini';
 import { fetchNasaObservations, NASA_PRODUCTS } from '../../../shared/nasa';
 import { buildProvenance } from '../../../shared/provenance';
@@ -165,11 +165,14 @@ async function handleGenerate(request: Request, env: Env, id: string): Promise<R
     const cached = await env.FIND_BUCKET.get(cacheObjectKey(cacheKey));
     if (cached) {
       const payload = (await cached.json()) as GenerateResponse;
-      payload.provenance.mode = 'cache';
-      payload.provenance.cache.status = 'HIT';
-      payload.requestId = id;
-      log('cache_hit', { requestId: id, region: region.id, cacheKey });
-      return json(payload, 200, request, env, { 'x-request-id': id, 'x-cache': 'HIT' });
+      if (shouldServeCachedHotspots(payload)) {
+        payload.provenance.mode = 'cache';
+        payload.provenance.cache.status = 'HIT';
+        payload.requestId = id;
+        log('cache_hit', { requestId: id, region: region.id, cacheKey });
+        return json(payload, 200, request, env, { 'x-request-id': id, 'x-cache': 'HIT' });
+      }
+      log('cache_bypass', { requestId: id, region: region.id, cacheKey, reason: 'stale_or_gemini_failure' });
     }
   }
 
@@ -204,7 +207,8 @@ async function handleGenerate(request: Request, env: Env, id: string): Promise<R
     disclaimer: DISCLAIMER,
   };
 
-  if (env.FIND_BUCKET) {
+  const cacheable = analysis.usedModel || !env.GEMINI_API_KEY;
+  if (env.FIND_BUCKET && cacheable) {
     await env.FIND_BUCKET.put(cacheObjectKey(cacheKey), JSON.stringify(payload), {
       httpMetadata: { contentType: 'application/json' },
       customMetadata: { storedAt: payload.provenance.generatedAt, pipelineVersion: PIPELINE_VERSION },

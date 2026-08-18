@@ -4,6 +4,7 @@
 
 - Allowlist the live Pages origin `https://finds-web-4j5.pages.dev` in Worker CORS defaults (keep the unused `finds-web.pages.dev` alias).
 - Record published v2.0.1 notes and refresh the release checklist against live Pages/Worker URLs.
+- Do not persist Gemini timeouts in R2; bypass poisoned cache entries; raise Gemini timeout to 45s and cap scored cells at 40 (`pipelineVersion` `2026.08.2`).
 
 ## 2.0.1 — 2026-08-18
 

@@ -91,6 +91,9 @@ export function mergeGeminiScores(
   return merged;
 }
 
+export const GEMINI_TIMEOUT_MS = 45_000;
+export const GEMINI_MAX_SCORED_CELLS = 40;
+
 export async function analyzeWithGemini(
   region: string,
   cells: ObservationCell[],
@@ -100,6 +103,7 @@ export async function analyzeWithGemini(
 ): Promise<GeminiAnalysis> {
   const fallback = cellsToHotspots(cells, allCells);
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
+  const scoredCells = cells.slice(0, GEMINI_MAX_SCORED_CELLS);
   if (!env.GEMINI_API_KEY) {
     return {
       hotspots: fallback,
@@ -111,7 +115,7 @@ export async function analyzeWithGemini(
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const body = {
-    contents: [{ role: 'user', parts: [{ text: buildGeminiPrompt(region, cells) }] }],
+    contents: [{ role: 'user', parts: [{ text: buildGeminiPrompt(region, scoredCells) }] }],
     generationConfig: {
       temperature: 0.2,
       responseMimeType: 'application/json',
@@ -119,8 +123,13 @@ export async function analyzeWithGemini(
     },
   };
 
+  const capNote =
+    cells.length > scoredCells.length
+      ? `Gemini ranked ${scoredCells.length} of ${cells.length} NASA-derived candidates; remaining cells used deterministic scores.`
+      : null;
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
+  const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
   try {
     const response = await fetchImpl(url, {
       method: 'POST',
@@ -148,7 +157,10 @@ export async function analyzeWithGemini(
       hotspots: mergeGeminiScores(cells, parsed.hotspots ?? [], allCells),
       model,
       usedModel: true,
-      qualityNotes: ['Gemini scored and explained NASA-derived observation cells; it did not generate coordinates.'],
+      qualityNotes: [
+        'Gemini scored and explained NASA-derived observation cells; it did not generate coordinates.',
+        ...(capNote ? [capNote] : []),
+      ],
     };
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'unknown error';
