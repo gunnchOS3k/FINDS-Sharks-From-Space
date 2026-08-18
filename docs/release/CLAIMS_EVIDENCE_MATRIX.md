@@ -2,7 +2,7 @@
 
 Status values: **PASS** (implemented and evidenced in production), **QUALIFIED** (implemented with explicit scientific/scope limits documented), **PARTIAL** (implemented but not fully exercised in production), **GAP** (not implemented), **HISTORICAL_ONLY** (Space Apps pitch only; superseded), **BLOCKED** (external gate).
 
-Last updated: Space Apps / GitHub claim alignment pass on `cursor/space-apps-claim-alignment`.
+Last updated: 2026-08-18 public-release follow-up (`cursor/finds-public-release-pixel6a-followup`). Production Pages origin is `https://finds-web-4j5.pages.dev`.
 
 See also: [SPACE_APPS_SUBMISSION_ALIGNMENT.md](./SPACE_APPS_SUBMISSION_ALIGNMENT.md)
 
@@ -34,7 +34,7 @@ See also: [SPACE_APPS_SUBMISSION_ALIGNMENT.md](./SPACE_APPS_SUBMISSION_ALIGNMENT
 
 | Claim | Implementation | Test | Evidence | Status |
 |---|---|---|---|---|
-| Gemini 3.6 Flash scores NASA cells only | `DEFAULT_GEMINI_MODEL=gemini-3.6-flash`; `mergeGeminiScores` drops unknown ids | `tests/unit/pipeline.test.ts` | `shared/gemini.ts`, live `/version` | PASS |
+| Gemini 3.6 Flash scores NASA cells only | `DEFAULT_GEMINI_MODEL=gemini-3.6-flash`; `mergeGeminiScores` drops unknown ids | `tests/unit/pipeline.test.ts` | `shared/gemini.ts`, live `/version`; live n=11 MISS used Gemini; default n=37 HIT currently a cached abort until this follow-up deploys | QUALIFIED |
 | Gemini does not observe sharks | Prompt + merge guards | Unit tests | `shared/gemini.ts` | PASS |
 | Gemini server-side only | Client → Worker; no `VITE_` Gemini key | grep `src/` | `src/services/api.ts` | PASS |
 | Structured JSON output | Schema-constrained response | Worker tests | `shared/gemini.ts` | PASS |
@@ -87,7 +87,7 @@ See also: [SPACE_APPS_SUBMISSION_ALIGNMENT.md](./SPACE_APPS_SUBMISSION_ALIGNMENT
 
 | Claim | Implementation | Test | Evidence | Status |
 |---|---|---|---|---|
-| Pixel 6a production APK | Physical device | adb + CDP | `docs/release/PIXEL_6A_VALIDATION.md` | PASS |
+| Pixel 6a production APK | Physical device | adb + CDP (2026-08-17); 2026-08-18 ADB unauthorized | `docs/release/PIXEL_6A_VALIDATION.md` | PASS (prior evidence; package unchanged) |
 | Pinch / spread (panel density) | Pointer pair simulation | CDP | `scripts/pixel-acceptance.mjs` | PASS |
 | Shake → gallery | DeviceMotionEvent | CDP | Same | PASS |
 | Automated CDP ≠ human UX sign-off | Documented | PIXEL_6A_VALIDATION.md | docs | QUALIFIED |
@@ -98,7 +98,7 @@ See also: [SPACE_APPS_SUBMISSION_ALIGNMENT.md](./SPACE_APPS_SUBMISSION_ALIGNMENT
 |---|---|---|
 | LIVE_WORKER_PASS | PASS | `https://finds-worker.gunnchos-finds.workers.dev` |
 | LIVE_PAGES_PASS | PASS | `https://finds-web-4j5.pages.dev` |
-| GEMINI_PRODUCTION_PASS | PASS | Live hotspots with Gemini provenance |
+| GEMINI_PRODUCTION_PASS | QUALIFIED | Live MISS returns `gemini-3.6-flash`; default cached n=37 currently stores a Gemini abort until pipeline `2026.08.2` deploys |
 | NASA_PRODUCTION_PASS | PASS | Live `sourceAgency: NASA` |
 | BUILD_PASS | PASS | `npm run verify` |
 | PUBLIC_EXPLANATION_PASS | QUALIFIED | Alignment pass updates |

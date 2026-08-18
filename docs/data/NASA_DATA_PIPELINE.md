@@ -24,6 +24,6 @@ GIBS GetFeatureInfo is not enabled on this endpoint. Earthdata granule/OPeNDAP N
 4. Each pixel center becomes a candidate lat/lon (the observation grid).
 5. RGB → physical value via colormap; nodata/land/gaps dropped.
 6. Deterministic scoring; Gemini may rank/explain those ids only.
-7. R2 cache keyed by region, bbox, date, variables, model, pipeline version.
+7. R2 cache keyed by region, bbox, date, variables, model, pipeline version. Gemini timeouts/HTTP errors are not stored as HIT; they are retried on the next request.
 
 Gemini never supplies coordinates in live mode.

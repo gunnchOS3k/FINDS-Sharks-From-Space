@@ -31,6 +31,17 @@ describe('worker routes', () => {
     expect(bad.status).toBe(405);
   });
 
+  it('allowlists the live Pages origin without extra ALLOWED_ORIGINS', async () => {
+    const response = await worker.fetch(
+      new Request('https://finds.example/health', {
+        headers: { origin: 'https://finds-web-4j5.pages.dev' },
+      }),
+      {},
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('access-control-allow-origin')).toBe('https://finds-web-4j5.pages.dev');
+  });
+
   it('rejects unknown regions', async () => {
     const response = await worker.fetch(
       new Request('http://localhost:3000/api/hotspots', {
@@ -74,6 +85,41 @@ describe('NASA adapter + cache', () => {
     expect(missBody.provenance.sourceAgency).toBe('NASA');
     const hit = await worker.fetch(req(), env(bucket));
     expect(hit.headers.get('x-cache')).toBe('HIT');
+    vi.unstubAllGlobals();
+  });
+
+  it('does not persist transient Gemini failures when a key is configured', async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('generativelanguage.googleapis.com')) {
+        return new Response('unavailable', { status: 503 });
+      }
+      if (url.includes('DescribeDomains')) {
+        return new Response('<Domains><DimensionDomain><Domain>2026-08-14/2026-08-14/P1D</Domain></DimensionDomain></Domains>');
+      }
+      if (url.includes('Chlorophyll') || url.includes('PACE') || url.includes('VIIRS')) {
+        return new Response(encodeChlPng(), { headers: { 'content-type': 'image/png' } });
+      }
+      return new Response(encodePngFixture(), { headers: { 'content-type': 'image/png' } });
+    });
+    vi.stubGlobal('fetch', fetchImpl);
+    const bucket = new Map<string, string>();
+    const workerEnv = { ...env(bucket), GEMINI_API_KEY: 'test-placeholder' };
+    const req = () =>
+      new Request('http://localhost:3000/api/hotspots', {
+        method: 'POST',
+        headers: { origin: 'http://localhost:3000', 'content-type': 'application/json' },
+        body: JSON.stringify({ region: 'New York Bight', n: 10 }),
+      });
+    const first = await worker.fetch(req(), workerEnv);
+    expect(first.status).toBe(200);
+    expect(first.headers.get('x-cache')).toBe('MISS');
+    const body = await first.json();
+    expect(body.provenance.model).toBeNull();
+    expect(body.provenance.sourceAgency).toBe('NASA');
+    expect(bucket.size).toBe(0);
+    const second = await worker.fetch(req(), workerEnv);
+    expect(second.headers.get('x-cache')).toBe('MISS');
     vi.unstubAllGlobals();
   });
 });

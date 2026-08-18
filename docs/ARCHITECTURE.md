@@ -13,6 +13,6 @@ Visitor → UI (Deck.gl) → POST /api/hotspots → Worker
 
 Worker routes: `GET /health`, `GET /version`, `POST /api/hotspots` (aliases `/generate`, `/api/generate`).
 
-CORS allowlists localhost, Capacitor origins, and `https://finds-web.pages.dev`. Production does not send `*`.
+CORS allowlists localhost, Capacitor origins, and the live Pages origin `https://finds-web-4j5.pages.dev` (the unused `https://finds-web.pages.dev` alias is kept). Production does not send `*`.
 
 See UML in `docs/architecture/uml/`, [Edge IO](architecture/EDGE_IO.md), and [ADR-001](architecture/ADR-001-canonical-client.md).

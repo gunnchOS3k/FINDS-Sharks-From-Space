@@ -6,7 +6,7 @@ workers_dev = true
 preview_urls = false
 
 [vars]
-PIPELINE_VERSION = "2026.08.1"
+PIPELINE_VERSION = "2026.08.2"
 GEMINI_MODEL = "gemini-3.6-flash"
 ALLOWED_ORIGINS = "https://finds-web-4j5.pages.dev,https://finds-web.pages.dev,http://localhost:3000,http://127.0.0.1:3000,http://localhost:4173,capacitor://localhost"
 

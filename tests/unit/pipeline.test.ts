@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { isCacheFresh, stableCacheKey } from '../../shared/cacheKey';
+import { isCacheFresh, shouldServeCachedHotspots, stableCacheKey } from '../../shared/cacheKey';
 import { parseColormapXml, lookupValue, buildLookup } from '../../shared/colormap';
 import { findRegion, isValidBBox, regionToBBox } from '../../shared/regions';
 import { cellsToHotspots, deterministicScore, selectCandidates } from '../../shared/scoring';
 import { HttpError, parseJsonBody, validateGenerateRequest } from '../../shared/validation';
 import { mergeGeminiScores } from '../../shared/gemini';
-import type { ObservationCell } from '../../shared/types';
+import type { GenerateResponse, ObservationCell } from '../../shared/types';
 
 const xml = `<?xml version="1.0"?>
 <ColorMaps>
@@ -71,6 +71,22 @@ describe('cache key', () => {
     expect(stableCacheKey(base)).not.toEqual(stableCacheKey({ ...base, observationDate: '2026-08-15' }));
     expect(isCacheFresh(new Date().toISOString(), 3600)).toBe(true);
     expect(isCacheFresh('2000-01-01T00:00:00Z', 60)).toBe(false);
+  });
+
+  it('refuses cached Gemini timeouts and expired payloads', () => {
+    const generatedAt = new Date().toISOString();
+    const failed = {
+      qualityNotes: ['Gemini unavailable (The operation was aborted); used deterministic NASA-derived scores.'],
+      generatedAt,
+      cache: { key: 'k', status: 'MISS' as const, ttlSeconds: 3600 },
+    } as GenerateResponse['provenance'];
+    const ok = {
+      qualityNotes: ['Gemini scored NASA-derived cells.'],
+      generatedAt,
+      cache: { key: 'k', status: 'MISS' as const, ttlSeconds: 3600 },
+    } as GenerateResponse['provenance'];
+    expect(shouldServeCachedHotspots({ provenance: failed })).toBe(false);
+    expect(shouldServeCachedHotspots({ provenance: ok })).toBe(true);
   });
 });
 
