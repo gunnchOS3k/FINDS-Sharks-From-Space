@@ -129,5 +129,8 @@ writeFileSync(join(root, 'public/favicon.ico'), drawIcon(32));
 for (const [name, svg] of Object.entries(sharks)) {
   writeFileSync(join(root, 'public/sharks', name), svg);
 }
-writeFileSync(join(root, 'docs/media/social-preview.svg'), favicon.replace('viewBox="0 0 64 64"', 'viewBox="0 0 64 64"').replace('<svg', '<svg width="1200" height="630"'));
+writeFileSync(
+  join(root, 'docs/media/social-preview.svg'),
+  favicon.replace('<svg', '<svg width="1200" height="630"'),
+);
 console.log('assets', createHash('sha256').update(favicon).digest('hex').slice(0, 8));
