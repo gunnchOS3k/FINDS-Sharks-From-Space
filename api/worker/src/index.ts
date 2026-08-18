@@ -165,7 +165,7 @@ async function handleGenerate(request: Request, env: Env, id: string): Promise<R
     const cached = await env.FIND_BUCKET.get(cacheObjectKey(cacheKey));
     if (cached) {
       const payload = (await cached.json()) as GenerateResponse;
-      if (shouldServeCachedHotspots(payload)) {
+      if (shouldServeCachedHotspots(payload, Date.now(), { requireGeminiModel: Boolean(env.GEMINI_API_KEY) })) {
         payload.provenance.mode = 'cache';
         payload.provenance.cache.status = 'HIT';
         payload.requestId = id;

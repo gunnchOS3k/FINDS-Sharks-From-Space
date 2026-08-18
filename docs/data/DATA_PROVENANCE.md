@@ -13,7 +13,7 @@ Every hotspot response includes `provenance`:
 | variables | SST °C and chlorophyll-a mg/m³ |
 | qualityNotes | Gaps, fallbacks, colormap decoding, Gemini status |
 | model | Gemini model if used, else null |
-| pipelineVersion | `2026.08.2` |
+| pipelineVersion | `2026.08.3` |
 | cache | key, HIT/MISS/BYPASS, TTL |
 
 Demo/offline fixtures use a deterministic New York Bight ocean grid and say so in `qualityNotes`. They are not live GIBS pulls and not Gemini-invented downtown coordinates.

@@ -98,7 +98,7 @@ export interface HealthResponse {
 export const DISCLAIMER =
   'FINDS is an exploratory research and visualization project. Hotspot scores are not real-time shark warnings and should not be used as a substitute for official marine-safety guidance.';
 
-export const PIPELINE_VERSION = '2026.08.2';
+export const PIPELINE_VERSION = '2026.08.3';
 export const SCHEMA_VERSION = '1.0.0' as const;
 export const MAX_POINTS = 200;
 export const MIN_POINTS = 10;

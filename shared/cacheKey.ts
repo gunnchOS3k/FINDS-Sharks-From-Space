@@ -47,10 +47,12 @@ export function isTransientGeminiFailure(qualityNotes: string[] | undefined): bo
 export function shouldServeCachedHotspots(
   payload: Pick<GenerateResponse, 'provenance'> | { provenance?: GenerateResponse['provenance'] },
   now = Date.now(),
+  options: { requireGeminiModel?: boolean } = {},
 ): boolean {
   const provenance = payload.provenance;
   if (!provenance) return false;
   if (isTransientGeminiFailure(provenance.qualityNotes)) return false;
+  if (options.requireGeminiModel && !provenance.model) return false;
   const ttl = provenance.cache?.ttlSeconds ?? CACHE_TTL_SECONDS;
   if (!provenance.generatedAt) return true;
   return isCacheFresh(provenance.generatedAt, ttl, now);

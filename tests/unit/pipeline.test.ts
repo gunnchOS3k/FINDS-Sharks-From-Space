@@ -87,6 +87,20 @@ describe('cache key', () => {
     } as GenerateResponse['provenance'];
     expect(shouldServeCachedHotspots({ provenance: failed })).toBe(false);
     expect(shouldServeCachedHotspots({ provenance: ok })).toBe(true);
+    expect(
+      shouldServeCachedHotspots(
+        { provenance: { ...ok, model: null } },
+        Date.now(),
+        { requireGeminiModel: true },
+      ),
+    ).toBe(false);
+    expect(
+      shouldServeCachedHotspots(
+        { provenance: { ...ok, model: 'gemini-3.6-flash' } },
+        Date.now(),
+        { requireGeminiModel: true },
+      ),
+    ).toBe(true);
   });
 });
 
