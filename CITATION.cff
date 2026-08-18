@@ -11,5 +11,5 @@ authors:
 repository-code: "https://github.com/gunnchOS3k/FINDS-Sharks-From-Space"
 abstract: "Exploratory NASA SST/chlorophyll habitat-hotspot visualization with Gemini-assisted ranking of observation cells. Not shark detection or marine-safety guidance."
 license: MIT
-version: 2.0.0
-date-released: "2026-08-17"
+version: 2.0.1
+date-released: "2026-08-18"

@@ -15,6 +15,14 @@ Device serial numbers are intentionally omitted.
 | Production Pages URL | `https://finds-web-4j5.pages.dev` |
 | Validation time | 2026-08-17 (America/Chicago) |
 
+## 2026-08-18 follow-up (this effort)
+
+ADB listed a connected device in `unauthorized` state. `adb shell getprop ro.product.model` did not run. No reinstall or smoke of `com.gunnchos.finds` was performed in this follow-up.
+
+Prior Pixel 6a evidence on `main` remains the hardware record: package `com.gunnchos.finds`, `versionName` `2.0.0`, `versionCode` 2. Git history after accepted SHA `c278584` does not change the Android applicationId, version, or production Worker URL. Screenshots in [docs/media/pixel6a/](../media/pixel6a/) are still present.
+
+To re-exercise: tap **Allow** on the Pixel USB debugging prompt, then `npm run android:install`.
+
 ## Production closeout status
 
 | Case | Result | Notes |
