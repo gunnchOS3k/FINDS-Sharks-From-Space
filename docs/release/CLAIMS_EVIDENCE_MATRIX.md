@@ -98,7 +98,7 @@ See also: [SPACE_APPS_SUBMISSION_ALIGNMENT.md](./SPACE_APPS_SUBMISSION_ALIGNMENT
 |---|---|---|
 | LIVE_WORKER_PASS | PASS | `https://finds-worker.gunnchos-finds.workers.dev` |
 | LIVE_PAGES_PASS | PASS | `https://finds-web-4j5.pages.dev` |
-| GEMINI_PRODUCTION_PASS | QUALIFIED | Live MISS returns `gemini-3.6-flash`; default cached n=37 currently stores a Gemini abort until pipeline `2026.08.2` deploys |
+| GEMINI_PRODUCTION_PASS | QUALIFIED | Live Gemini path is configured; pipeline `2026.08.3` bypasses cached NASA-only payloads when a Gemini key is present |
 | NASA_PRODUCTION_PASS | PASS | Live `sourceAgency: NASA` |
 | BUILD_PASS | PASS | `npm run verify` |
 | PUBLIC_EXPLANATION_PASS | QUALIFIED | Alignment pass updates |

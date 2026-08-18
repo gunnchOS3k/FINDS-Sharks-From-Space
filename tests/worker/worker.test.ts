@@ -122,4 +122,36 @@ describe('NASA adapter + cache', () => {
     expect(second.headers.get('x-cache')).toBe('MISS');
     vi.unstubAllGlobals();
   });
+
+  it('bypasses cached NASA-only payloads when a Gemini key is configured', async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('generativelanguage.googleapis.com')) {
+        return new Response('unavailable', { status: 503 });
+      }
+      if (url.includes('DescribeDomains')) {
+        return new Response('<Domains><DimensionDomain><Domain>2026-08-14/2026-08-14/P1D</Domain></DimensionDomain></Domains>');
+      }
+      if (url.includes('Chlorophyll') || url.includes('PACE') || url.includes('VIIRS')) {
+        return new Response(encodeChlPng(), { headers: { 'content-type': 'image/png' } });
+      }
+      return new Response(encodePngFixture(), { headers: { 'content-type': 'image/png' } });
+    });
+    vi.stubGlobal('fetch', fetchImpl);
+    const bucket = new Map<string, string>();
+    const req = () =>
+      new Request('http://localhost:3000/api/hotspots', {
+        method: 'POST',
+        headers: { origin: 'http://localhost:3000', 'content-type': 'application/json' },
+        body: JSON.stringify({ region: 'New York Bight', n: 10 }),
+      });
+    const seeded = await worker.fetch(req(), env(bucket));
+    expect(seeded.headers.get('x-cache')).toBe('MISS');
+    expect((await seeded.json()).provenance.model).toBeNull();
+    expect(bucket.size).toBe(1);
+    const bypass = await worker.fetch(req(), { ...env(bucket), GEMINI_API_KEY: 'test-placeholder' });
+    expect(bypass.headers.get('x-cache')).toBe('MISS');
+    expect((await bypass.json()).provenance.model).toBeNull();
+    vi.unstubAllGlobals();
+  });
 });
